@@ -8,6 +8,7 @@ class testwindow(Ui_test1window):
         Ui_test1window.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setupUi(dialog)
+        #test
 
 class FirstGuiProgram(Ui_Dialog):
     def __init__(self, dialog):
