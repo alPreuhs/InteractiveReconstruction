@@ -15,7 +15,7 @@ class FirstGuiProgram(Ui_Dialog):
 
         #Loading a image in the grapical view widget
         img_sinogram = QtGui.QImage('/Users/Janani/Downloads/phantom.png')
-        img_sinogram = img_sinogram.scaled(231, 191 , aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
+        img_sinogram = img_sinogram.scaled(191,231, aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
         self.pix_sinogram = QtGui.QPixmap(img_sinogram)
         self.gps_sinogram_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_sinogram)
         #self.offset = numpy.zeros(shape=(3, 2))
