@@ -11,7 +11,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Wid_PhantomSelect(object):
     def setupUi(self, Wid_PhantomSelect):
         Wid_PhantomSelect.setObjectName("Wid_PhantomSelect")
-        Wid_PhantomSelect.resize(636, 547)
+        Wid_PhantomSelect.resize(647, 580)
+        Wid_PhantomSelect.setToolTipDuration(-1)
         self.gridLayout = QtWidgets.QGridLayout(Wid_PhantomSelect)
         self.gridLayout.setObjectName("gridLayout")
         self.frame_SelectPhantom = QtWidgets.QFrame(Wid_PhantomSelect)
@@ -21,6 +22,7 @@ class Ui_Wid_PhantomSelect(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(self.frame_SelectPhantom)
         self.verticalLayout.setObjectName("verticalLayout")
         self.ListWid_SelectPhantom = QtWidgets.QListWidget(self.frame_SelectPhantom)
+        self.ListWid_SelectPhantom.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.ListWid_SelectPhantom.setObjectName("ListWid_SelectPhantom")
         self.verticalLayout.addWidget(self.ListWid_SelectPhantom)
         self.gridLayout.addWidget(self.frame_SelectPhantom, 0, 0, 1, 1)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>856</width>
-    <height>642</height>
+    <width>869</width>
+    <height>633</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -137,44 +137,38 @@
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>331</width>
-          <height>299</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QPushButton" name="pB_PhantomSelect">
-           <property name="text">
-            <string>Select Phantom</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cBox_Filterselect">
-           <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QPushButton" name="pB_PhantomSelect">
             <property name="text">
-             <string>Parker weighting</string>
+             <string>Select Phantom</string>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Ramp filter</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Cosine weighting</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cBox_Filterselect">
+            <item>
+             <property name="text">
+              <string>Parker weighting</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Ramp filter</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Cosine weighting</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>

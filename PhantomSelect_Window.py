@@ -12,35 +12,39 @@ class selectPhantom(Ui_Wid_PhantomSelect):
     def __init__(self, widget):
         Ui_Wid_PhantomSelect.__init__(self)
         self.setupUi(widget)
-        self.listwidload()
-        self.ListWid_SelectPhantom.itemClicked.connect(self.getPhantom)
-
-    #function for getting the phantom
-    def getPhantom(self):
-        sel = self.ListWid_SelectPhantom.currentIndex().data()
-        print(sel)
-        return sel
+        self.listwidload
 
     #Loading the listwidget with images of phantom
+
     def listwidload(self):
-        i = 0
+        i = 1
+        j = 1
         files = []
         for file in os.listdir("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction"):
             if file.endswith(".png"):
                files.append(os.path.join(os.getcwd(), file))
 
+        Phantom_Path = {}
+        for x in files:
+            Phantom_Path["Phantom"+str(i)]  = x
+            #print (Phantom_Path["Phantom"+str(i)])
+            i=i+1
+
+
         for x in files:
             item = QtWidgets.QListWidgetItem()
             icon = QtGui.QIcon()
-            #icon.addPixmap(QtGui.QPixmap(x), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            icon.addFile(x, QtCore.QSize(200, 200))
-            Name = "Phantom"+str(i)
-            i=i+1
+            icon.addPixmap(QtGui.QPixmap(x), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            #Name = "Phantom"+str(i)
+            #i=i+1
             item.setIcon(icon)
-            item.setText(Name)
+            item.setText("Phantom"+str(j))
+            j+=1
             self.ListWid_SelectPhantom.setSelectionMode( QtWidgets.QAbstractItemView.ExtendedSelection )
             self.ListWid_SelectPhantom.addItem(item)
             self.ListWid_SelectPhantom.setIconSize(QtCore.QSize(200,200))
+
+        return Phantom_Path
 
 if __name__ == '__main__':
     import sys

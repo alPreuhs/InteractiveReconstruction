@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>547</height>
+    <width>647</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Phantom Selection Window</string>
+  </property>
+  <property name="toolTipDuration">
+   <number>-1</number>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -24,7 +27,11 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QListWidget" name="ListWid_SelectPhantom"/>
+       <widget class="QListWidget" name="ListWid_SelectPhantom">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::ExtendedSelection</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
