@@ -71,6 +71,9 @@
         </item>
         <item>
          <widget class="QSlider" name="hSlider_Phantom">
+          <property name="maximum">
+           <number>180</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -117,6 +120,9 @@
         </item>
         <item>
          <widget class="QSlider" name="hSlider_Backproj">
+          <property name="maximum">
+           <number>180</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

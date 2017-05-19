@@ -1,17 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import subprocess
-import numpy
+import numpy as np
 from fanGUI_Project import Ui_wid_FanRecont
 from PhantomSelect_Window import selectPhantom
 from PhantomSelect import Ui_Wid_PhantomSelect
 
 class fanbeam_main(Ui_wid_FanRecont):
-    #Initialization function
+
     phantom_value = {}
     file_path = 'NULL'
-    def __init__(self, dialog):
-        print("test")
+    #def __init__(self, dialog):
+     #   print("test")
         #Ui_wid_FanRecont.__init__(self)
         #self.setupUi(dialog)
 
@@ -39,6 +39,11 @@ class fanbeam_main(Ui_wid_FanRecont):
         img_Phantom = img_Phantom.scaled(377,217, aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
         self.pix_Phantom = QtGui.QPixmap(img_Phantom)
         self.gps_Phantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
+        self.offset = np.zeros(shape=(3, 2))
+        self.offset[0, ...] = [-self.pix_Phantom.width() / 2, -self.pix_Phantom.height() * 3 / 4]
+        self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
+        self.gps_Phantom.setOffset(self.offset[0, 0], self.offset[0, 1])
+        self.gps_Phantom.setPos(-  self.offset[0, 0], -self.offset[0, 1])
         self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
         self.gs_Phantom = QtWidgets.QGraphicsScene()
         self.gs_Phantom.clear()
@@ -48,11 +53,13 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gs_Phantom.update()
 
 
-        #slide bar with image movement
-        #self.hSlider_1.valueChanged.connect(self.hslider_changed)
+    #slide bar with image movement
+    #def Phantom_Slider_Moved(self):
+       # self.hSlider_Phantom.valueChanged.connect(self.hslider_changed)
 
 
     #def hslider_changed(self):
+        #hSlider_Phantom_value = self.hSlider_Phantom.value()
 
 
 
@@ -61,8 +68,9 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     wid_FanRecont = QtWidgets.QWidget()
-    ui = fanbeam_main(wid_FanRecont)
+    ui = fanbeam_main()
     ui.setupUi(wid_FanRecont)
     ui.PhantomSelect_click()
+    #ui.Phantom_Slider_Moved()
     wid_FanRecont.show()
     sys.exit(app.exec_())
