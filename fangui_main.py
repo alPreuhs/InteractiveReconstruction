@@ -59,21 +59,21 @@ class fanbeam_main(Ui_wid_FanRecont):
 
     def hslider_changed(self):
         self.hSlider_Phantom_value = self.hSlider_Phantom.value()
-        print(self.hSlider_Phantom_value)
+        print(-self.hSlider_Phantom_value)
         self.rotation_triangle()
 
     def rotation_triangle(self):
-        self.offset = np.zeros(shape=(3, 2))
-        self.offset[0, ...] = [-self.pix_Phantom.width() / 2, -self.pix_Phantom.height()  / 2]
-        self.Line1.setPos(-self.offset[0, 0], -self.offset[0, 1])
-        self.Line2.setPos(-self.offset[0, 0], -self.offset[0, 1])
-        self.Line3.setPos(-self.offset[0, 0], -self.offset[0, 1])
-        self.Line1.setTransformOriginPoint(self.Line1.mapFromScene(QtCore.QPointF(95,95)))
-        self.Line2.setTransformOriginPoint(self.Line1.mapFromScene(QtCore.QPointF(95,95)))
-        self.Line3.setTransformOriginPoint(self.Line1.mapFromScene(QtCore.QPointF(95,95)))
-        self.Line1.setRotation(self.hSlider_Phantom_value)
-        self.Line2.setRotation(self.hSlider_Phantom_value)
-        self.Line3.setRotation(self.hSlider_Phantom_value)
+        #self.offset = np.zeros(shape=(3, 2))
+        #self.offset[0, ...] = [-self.pix_Phantom.width() / 2, -self.pix_Phantom.height()  / 2]
+        #self.Line1.setPos(-self.offset[0, 0], -self.offset[0, 1])
+        #self.Line2.setPos(-self.offset[0, 0], -self.offset[0, 1])
+        #self.Line3.setPos(-self.offset[0, 0], -self.offset[0, 1])
+        self.Line1.setTransformOriginPoint(self.Line1.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 )))
+        self.Line2.setTransformOriginPoint(self.Line2.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 )))
+        self.Line3.setTransformOriginPoint(self.Line3.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2)))
+        self.Line1.setRotation(-self.hSlider_Phantom_value)
+        self.Line2.setRotation(-self.hSlider_Phantom_value)
+        self.Line3.setRotation(-self.hSlider_Phantom_value)
 
 if __name__ == '__main__':
     import sys
