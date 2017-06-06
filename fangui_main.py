@@ -36,7 +36,7 @@ class fanbeam_main(Ui_wid_FanRecont):
     #Function for loading the phantom
     def Phantom_load(self):
         img_Phantom = QtGui.QImage(self.phantom_value[self.file_path])
-        img_Phantom = img_Phantom.scaled(377,217, aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
+        img_Phantom = img_Phantom.scaled(377,377, aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
         self.pix_Phantom = QtGui.QPixmap(img_Phantom)
         self.gps_Phantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
         self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
@@ -44,9 +44,10 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gs_Phantom = QtWidgets.QGraphicsScene()
         self.gs_Phantom.clear()
         self.gs_Phantom.addItem(self.gps_Phantom)
-        self.Line1 = self.gs_Phantom.addLine(0, 0, 65, 216, QtCore.Qt.white)
-        self.Line2 = self.gs_Phantom.addLine(0, 0, 245, 45, QtCore.Qt.white)
-        self.Line3 = self.gs_Phantom.addLine(65, 216, 245, 45, QtCore.Qt.white)
+        self.Ecllipse = self.gs_Phantom.addEllipse(0,0,25,25,QtCore.Qt.white)
+        self.Line1 = self.gs_Phantom.addLine(20, 20, 150, 370, QtCore.Qt.white)
+        self.Line2 = self.gs_Phantom.addLine(20, 20, 370,150, QtCore.Qt.white)
+        self.Line3 = self.gs_Phantom.addLine(150, 370, 370, 150, QtCore.Qt.white)
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
@@ -60,20 +61,22 @@ class fanbeam_main(Ui_wid_FanRecont):
     def hslider_changed(self):
         self.hSlider_Phantom_value = self.hSlider_Phantom.value()
         print(-self.hSlider_Phantom_value)
-        self.rotation_triangle()
+        self.rotation_triangle(-self.hSlider_Phantom_value)
 
-    def rotation_triangle(self):
+    def rotation_triangle(self, val):
         #self.offset = np.zeros(shape=(3, 2))
         #self.offset[0, ...] = [-self.pix_Phantom.width() / 2, -self.pix_Phantom.height()  / 2]
         #self.Line1.setPos(-self.offset[0, 0], -self.offset[0, 1])
         #self.Line2.setPos(-self.offset[0, 0], -self.offset[0, 1])
         #self.Line3.setPos(-self.offset[0, 0], -self.offset[0, 1])
-        self.Line1.setTransformOriginPoint(self.Line1.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 )))
-        self.Line2.setTransformOriginPoint(self.Line2.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 )))
-        self.Line3.setTransformOriginPoint(self.Line3.mapFromScene(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2)))
-        self.Line1.setRotation(-self.hSlider_Phantom_value)
-        self.Line2.setRotation(-self.hSlider_Phantom_value)
-        self.Line3.setRotation(-self.hSlider_Phantom_value)
+        self.Line1.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
+        self.Line2.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
+        self.Line3.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2))
+        self.Ecllipse.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
+        self.Line1.setRotation(val)
+        self.Line2.setRotation(val)
+        self.Line3.setRotation(val)
+        self.Ecllipse.setRotation(val)
 
 if __name__ == '__main__':
     import sys
@@ -84,6 +87,5 @@ if __name__ == '__main__':
     ui.setupUi(wid_FanRecont)
     ui.PhantomSelect_click()
     ui.Phantom_Slider_Moved()
-    #ui.rotation_triangle()
     wid_FanRecont.show()
     sys.exit(app.exec_())
