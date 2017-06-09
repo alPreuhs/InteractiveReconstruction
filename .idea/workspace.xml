@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b0d2712f-d7a1-49b7-823a-e17db9763b15" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/circleEllipse.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/ellipse.png" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/phantom.png" afterPath="$PROJECT_DIR$/phantom.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fangui_main.py" afterPath="$PROJECT_DIR$/fangui_main.py" />
     </list>
@@ -24,8 +21,8 @@
       <file leaf-file-name="fangui_main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/fangui_main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="88" column="29" lean-forward="false" selection-start-line="88" selection-start-column="29" selection-end-line="88" selection-end-column="29" />
+            <state relative-caret-position="159">
+              <caret line="50" column="61" lean-forward="false" selection-start-line="50" selection-start-column="61" selection-end-line="50" selection-end-column="61" />
               <folding>
                 <element signature="e#0#42#0" expanded="true" />
               </folding>
@@ -629,8 +626,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/fangui_main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="88" column="29" lean-forward="false" selection-start-line="88" selection-start-column="29" selection-end-line="88" selection-end-column="29" />
+        <state relative-caret-position="159">
+          <caret line="50" column="61" lean-forward="false" selection-start-line="50" selection-start-column="61" selection-end-line="50" selection-end-column="61" />
           <folding>
             <element signature="e#0#42#0" expanded="true" />
           </folding>

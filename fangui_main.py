@@ -2,6 +2,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import subprocess
 import numpy as np
+import scipy
+#from __future__ import division
+#from __future__ import print_function
 from fanGUI_Project import Ui_wid_FanRecont
 from PhantomSelect_Window import selectPhantom
 from PhantomSelect import Ui_Wid_PhantomSelect
@@ -45,9 +48,9 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gs_Phantom.clear()
         self.gs_Phantom.addItem(self.gps_Phantom)
         self.Ecllipse = self.gs_Phantom.addEllipse(0,0,25,25,QtCore.Qt.white)
-        self.Line1 = self.gs_Phantom.addLine(20, 20, 150, 370, QtCore.Qt.white)
-        self.Line2 = self.gs_Phantom.addLine(20, 20, 370,150, QtCore.Qt.white)
-        self.Line3 = self.gs_Phantom.addLine(150, 370, 370, 150, QtCore.Qt.white)
+        self.Line1 = self.gs_Phantom.addLine(20, 20, 150, 375, QtCore.Qt.white)
+        self.Line2 = self.gs_Phantom.addLine(20, 20, 375,150, QtCore.Qt.white)
+        self.Line3 = self.gs_Phantom.addLine(150, 375, 375, 150, QtCore.Qt.white)
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
