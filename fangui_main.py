@@ -1,7 +1,10 @@
 from __future__ import division
 from __future__ import print_function
 from PIL import Image
-from pla
+from numpy import mgrid
+from sklearn.preprocessing import normalize
+from numpy import ones,vstack
+from numpy.linalg import lstsq
 from PyQt5 import QtCore, QtGui, QtWidgets
 from fanGUI_Project import Ui_wid_FanRecont
 from PhantomSelect_Window import selectPhantom
@@ -29,17 +32,32 @@ class fanbeam_main(Ui_wid_FanRecont):
         #self.setupUi(dialog)
 
 
-    def radonRayDrivenApproach(image ,detectorSize ,dSI ,detectorSpacing,angStepSize,angularRange,numDet,numProj,dDI):
-        angStepSize = angularRange / numProj
-        maxDetIndex = numDet / detectorSpacing
-        dSD = dSI + dDI
-        maxBetaIndex = angularRange / angStepSize
-        detectorSizeIndex = detectorSize / detectorSpacing
-        samplingRate = 3
-        fanogram = np.ndarray((detectorSizeIndex, maxBetaIndex))
-        fanogram = np.arange(detectorSpacing, angStepSize)
-        fanogram = np.random(-(detectorSizeIndex-1.0) * detectorSpacing/2.0,0)
-        trans = trans
+    def radonRayDrivenApproach(dSI,dDI,val,detectorSize,detectorSpacing):
+        detectorSizeIndex = (detectorSize / detectorSpacing)
+        cosBeta = math.cos(val)
+        sinBeta = math.sin(val)
+        source_x = dSI * (cosBeta)
+        source_y = dSI * sinBeta
+        PP_Point_x = -detectorSize/2 * sinBeta
+        PP_Point_y = detectorSize/2 * (cosBeta)
+        PP = (PP_Point_x,PP_Point_y)
+        source = (source_x,source_y)
+        PP_vector = np.array(PP)*(-1)
+        print("sourcex : ", source_x,"sourcey : ",source_y)
+        print("PP_Point_x : " ,PP_Point_x,"PP_Point_y : ", PP_Point_y)
+        dirDetector = (PP)/ np.linalg.norm(PP)
+        print("dirDetector   ",dirDetector)
+        for t in range (0,int(detectorSizeIndex)):
+                stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
+                print("stepsDirection   ",stepsDirection)
+                P = np.array(PP)+(dirDetector * stepsDirection)
+                points = (source,P)
+                x_coords, y_coords = zip(*points)
+                A = vstack([x_coords, ones(len(x_coords))]).T
+                m, c = lstsq(A, y_coords)[0]
+                straightline = "{m}x + {c}".format(m=m, c=c)
+                print (straightline)
+                
 
 
     #Logic for clicking the push button and getting new window
@@ -77,10 +95,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
-        print(self.phantom_value[self.file_path])
-        self.temp = np.asarray(Image.open(self.phantom_value[self.file_path]), dtype="int32").reshape(377,377)
-        #self.im = imread(self.phantom_value[self.file_path])
-        #print(self.temp)
+
 
     #slide bar with image movement
     def Phantom_Slider_Moved(self):
@@ -89,7 +104,6 @@ class fanbeam_main(Ui_wid_FanRecont):
 
     def hslider_changed(self):
         self.hSlider_Phantom_value = self.hSlider_Phantom.value()
-        print(-self.hSlider_Phantom_value)
         self.rotation_triangle(-self.hSlider_Phantom_value)
 
     def rotation_triangle(self, val):
@@ -101,7 +115,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.Line2.setRotation(val)
         self.Line3.setRotation(val)
         self.Ecllipse.setRotation(val)
-        fanbeam_main.radon_fan_translation(self.temp,377,1,1,1)
+        fanbeam_main.radonRayDrivenApproach(231.2,105,val,318,1)
 
 
 
