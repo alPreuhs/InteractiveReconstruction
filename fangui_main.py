@@ -34,6 +34,7 @@ class fanbeam_main(Ui_wid_FanRecont):
 
     def radonRayDrivenApproach(dSI,dDI,val,detectorSize,detectorSpacing):
         detectorSizeIndex = (detectorSize / detectorSpacing)
+        samplingRate = 3
         cosBeta = math.cos(val)
         sinBeta = math.sin(val)
         source_x = dSI * (cosBeta)
@@ -52,12 +53,17 @@ class fanbeam_main(Ui_wid_FanRecont):
                 print("stepsDirection   ",stepsDirection)
                 P = np.array(PP)+(dirDetector * stepsDirection)
                 points = (source,P)
+                distance = math.hypot(PP_Point_x-source_x , PP_Point_y-source_y)
+                print("distance  " , distance)
                 x_coords, y_coords = zip(*points)
                 A = vstack([x_coords, ones(len(x_coords))]).T
                 m, c = lstsq(A, y_coords)[0]
                 straightline = "{m}x + {c}".format(m=m, c=c)
                 print (straightline)
-                
+                for Linet in range(0,distance*samplingRate):
+                    current = source
+                    
+
 
 
     #Logic for clicking the push button and getting new window
