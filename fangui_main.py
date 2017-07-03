@@ -1,6 +1,7 @@
 from __future__ import division
 from __future__ import print_function
 from PIL import Image
+from scipy import interpolate
 from numpy import mgrid
 from sklearn.preprocessing import normalize
 from numpy import ones,vstack
@@ -32,9 +33,9 @@ class fanbeam_main(Ui_wid_FanRecont):
         #self.setupUi(dialog)
 
 
-    def radonRayDrivenApproach(dSI,dDI,val,detectorSize,detectorSpacing):
+    def radonRayDrivenApproach(self,image,dSI,dDI,val,detectorSize,detectorSpacing):
         detectorSizeIndex = (detectorSize / detectorSpacing)
-        samplingRate = 3
+        samplingRate = 3.0
         cosBeta = math.cos(val)
         sinBeta = math.sin(val)
         source_x = dSI * (cosBeta)
@@ -60,10 +61,20 @@ class fanbeam_main(Ui_wid_FanRecont):
                 m, c = lstsq(A, y_coords)[0]
                 straightline = "{m}x + {c}".format(m=m, c=c)
                 print (straightline)
-                for Linet in range(0,distance*samplingRate):
-                    current = source
-                    
-
+                increment = 1.0/distance*samplingRate
+                sum = 0.0
+                for Linet in np.arange(0.0,distance*samplingRate):
+                    current = np.array(source) +  increment * Linet
+                    phantomWidth = 377
+                    phantomHeight = 377
+                    if((phantomWidth) <= ((current.item(0)) + 1)) or ((phantomHeight) <= ((current.item(1)) + 1))\
+                    or ((current.item(0)) < 0) or ((current.item(1)) < 0):
+                        continue
+                    sum = interpolate.LinearNDInterpolator(current.item(0), current.item(1), image, kind='cubic')
+                sum = sum/samplingRate
+                print("sum    ",sum)
+                fanogram = np.sum
+                
 
 
     #Logic for clicking the push button and getting new window
@@ -101,6 +112,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
+        self.image = np.asarray(Image.open(self.phantom_value[self.file_path]), dtype="int32")
 
 
     #slide bar with image movement
@@ -121,7 +133,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.Line2.setRotation(val)
         self.Line3.setRotation(val)
         self.Ecllipse.setRotation(val)
-        fanbeam_main.radonRayDrivenApproach(231.2,105,val,318,1)
+        fanbeam_main.radonRayDrivenApproach(self,self.image,231.2,105,val,318,1)
 
 
 
