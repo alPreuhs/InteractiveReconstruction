@@ -33,23 +33,31 @@ class fanbeam_main(Ui_wid_FanRecont):
         #self.setupUi(dialog)
 
 
-    def radonRayDrivenApproach(self,image,dSI,dDI,val,detectorSize,detectorSpacing):
+    def radonRayDrivenApproach(self,image,dSI,dDI,val,detectorSize,detectorSpacing,numProj):
         detectorSizeIndex = (detectorSize / detectorSpacing)
+        maxbeta = math.pi
+        gammaM = math.atan((detectorSize/2.0-0.5 ) / dSI)
+        angRange = math.pi +  2*gammaM
+        angStepSize = angRange / numProj
         samplingRate = 3.0
-        cosBeta = math.cos(val)
-        sinBeta = math.sin(val)
-        source_x = dSI * (cosBeta)
-        source_y = dSI * sinBeta
-        PP_Point_x = -detectorSize/2 * sinBeta
-        PP_Point_y = detectorSize/2 * (cosBeta)
-        PP = (PP_Point_x,PP_Point_y)
-        source = (source_x,source_y)
-        PP_vector = np.array(PP)*(-1)
-        print("sourcex : ", source_x,"sourcey : ",source_y)
-        print("PP_Point_x : " ,PP_Point_x,"PP_Point_y : ", PP_Point_y)
-        dirDetector = (PP)/ np.linalg.norm(PP)
-        print("dirDetector   ",dirDetector)
-        for t in range (0,int(detectorSizeIndex)):
+        maxbetaindex = maxbeta / angStepSize
+        fanogram = Image.new('RGB',(377,377), "black") # create a new black image
+        pixels = fanogram.load()
+        for i in np.arange (0.0,maxbetaindex):
+            cosBeta = math.cos(val)
+            sinBeta = math.sin(val)
+            source_x = dSI * (cosBeta)
+            source_y = dSI * sinBeta
+            PP_Point_x = -detectorSize/2 * sinBeta
+            PP_Point_y = detectorSize/2 * (cosBeta)
+            PP = (PP_Point_x,PP_Point_y)
+            source = (source_x,source_y)
+            PP_vector = np.array(PP)*(-1)
+            print("sourcex : ", source_x,"sourcey : ",source_y)
+            print("PP_Point_x : " ,PP_Point_x,"PP_Point_y : ", PP_Point_y)
+            dirDetector = (PP)/ np.linalg.norm(PP)
+            print("dirDetector   ",dirDetector)
+            for t in range (0,int(detectorSizeIndex)):
                 stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
                 print("stepsDirection   ",stepsDirection)
                 P = np.array(PP)+(dirDetector * stepsDirection)
@@ -73,9 +81,8 @@ class fanbeam_main(Ui_wid_FanRecont):
                     sum = interpolate.LinearNDInterpolator(current.item(0), current.item(1), image, kind='cubic')
                 sum = sum/samplingRate
                 print("sum    ",sum)
-                fanogram = np.sum
-                
-
+                pixels = (i, t, 377)
+                fanogram.show()
 
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
@@ -133,7 +140,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.Line2.setRotation(val)
         self.Line3.setRotation(val)
         self.Ecllipse.setRotation(val)
-        fanbeam_main.radonRayDrivenApproach(self,self.image,231.2,105,val,318,1)
+        fanbeam_main.radonRayDrivenApproach(self,self.image,231.2,105,val,318,1,377)
 
 
 
