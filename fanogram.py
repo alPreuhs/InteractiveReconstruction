@@ -4,11 +4,20 @@ import numpy as np
 from projector import radonRayDrivenApproach as rrd
 from projector import interpolation_Image as inter
 from projector import plot_interp as pl
+from skimage.color import rgb2gray
 from PIL import Image
+import matplotlib.image as mpimg
+from skimage.color import rgb2gray
 
-image = np.asarray(Image.open("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/circle.png"))
+img = Image.open("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/circle.png")
+#img = mpimg.imread("/Users/Janani/Desktop/09.png")
 
-pl(image)
-#fanogram = rrd(inter(image),231.2,105,0,318,1,377)
-fan = rrd(inter(image))
-pl(image,fan)
+
+arr = np.array(img)
+
+
+#pl(image)
+#fanogram = rrd((inter(arr)),231.2,105,50,318,1,377)
+fan = rrd(inter(arr))
+#pl(img,fanogram)
+pl(img,fan)

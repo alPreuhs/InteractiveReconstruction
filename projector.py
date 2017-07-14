@@ -10,11 +10,11 @@ import matplotlib.pylab as plt
 import numpy as np
 
 
-def interpolation_Image(image):
-    x = np.arange(image.shape[0])
-    y = np.arange(image.shape[1])
-    z = image
-    img_interp_spline = RectBivariateSpline(x=x, y=y, z=image, bbox=[None, None, None, None], kx=3, ky=3, s=0)
+def interpolation_Image(arr):
+    x = np.arange(arr.shape[0])
+    y = np.arange(arr.shape[1])
+    z = arr
+    img_interp_spline = RectBivariateSpline(x=x, y=y, z=arr, bbox=[None, None, None, None], kx=3, ky=3, s=0)
     return img_interp_spline
 
 '''
@@ -41,9 +41,8 @@ def radonRayDrivenApproach(img_interp_spline, dSI, dDI, val, detectorSize, detec
             PP_Point_y = detectorSize / 2 * (cosBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
-            PP_vector = np.array(PP) * (-1)
-            #    print("sourcex : ", source_x,"sourcey : ",source_y)
-            #    print("PP_Point_x : " ,PP_Point_x,"PP_Point_y : ", PP_Point_y)
+            PP_vector = np.array(PP) * (-cosBeta)+ np.array(PP)* (-sinBeta)
+            print("sum    ", PP_vector)
             dirDetector = (PP) / np.linalg.norm(PP)
             #    print("dirDetector   ",dirDetector)
             for t in range(0, int(detectorSizeIndex)):
@@ -71,11 +70,13 @@ def radonRayDrivenApproach(img_interp_spline, dSI, dDI, val, detectorSize, detec
                     sum += img_interp_spline(current.item(0), current.item(1))
                 sum /= samplingRate
 
-                print("sum    ", sum)
+
+                pixels = (i, t, sum)
+        return fan_img
 '''
 def plot_interp(image, img_):
-    fig, axes = plt.subplots(1, 3, figsize=(16, (16 / 3) * image.shape[0] / image.shape[1]))
-    for ax, (im, text) in zip(axes, ((image, 'original'), (img_, 'interpolated'), (image - img_, 'difference'))):
+    fig, axes = plt.subplots(1, 3)
+    for ax, (im, text) in zip(axes, ((image, 'original'), (img_, 'interpolated'))):
         ax.imshow(im, cmap='gray')
         ax.title.set_text(text)
         ax.axis('off')
@@ -83,8 +84,12 @@ def plot_interp(image, img_):
     plt.tight_layout(pad=0)
     plt.show()
 
+
 def radonRayDrivenApproach(img_interp_spline):
-    for i in np.arange(0, 5):
-        for j in np.arange(0, 5):
+    for i in np.arange(0, 100):
+        for j in np.arange(0, 100):
             img_ = img_interp_spline(i+0.5, j+0.5)
+            print(img_)
             return img_
+
+        

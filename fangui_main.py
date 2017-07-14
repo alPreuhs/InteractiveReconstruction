@@ -7,14 +7,12 @@ from numpy.linalg import lstsq
 from PyQt5 import QtCore, QtGui, QtWidgets
 from fanGUI_Project import Ui_wid_FanRecont
 from PhantomSelect_Window import selectPhantom
+from sklearn import preprocessing
+from sympy import Point3D, Line3D
 import math
 import numpy as np
 from projector import radonRayDrivenApproach as rrd
 import matplotlib.pylab as plt
-
-
-__all__ = ["radon", "radon_fan_translation", "get_fan_coords",
-           "get_det_coords"]
 
 
 
@@ -37,41 +35,40 @@ class fanbeam_main(Ui_wid_FanRecont):
 
 
     def radonRayDrivenApproach(self,img_interp_spline,dSI,dDI,val,detectorSize,detectorSpacing,numProj):
-        rrd(image,dSI,dDI,val,detectorSize,detectorSpacing,numProj)
-        '''
-        #fan_img = Image.new('RGB', (377, 377), "black")  # create a new black image
-        #pixels = fan_img.load()
-        #detectorSizeIndex = (detectorSize / detectorSpacing)
-        #gammaM = math.atan((detectorSize/2.0-0.5 ) / dSI)
-        #angRange = val +  2*gammaM
-        angStepSize = angRange / numProj
+        rrd(img_interp_spline,dSI,dDI,val,detectorSize,detectorSpacing,numProj)
+'''
+        fan_img = Image.new('RGB',(377, 377), "black")  # create a new black image
+        pixels = fan_img.load()
+        detectorSizeIndex = (detectorSize / detectorSpacing)
         samplingRate = 3.0
+        gammaM = math.atan((detectorSize/2.0-0.5 ) / dSI)
+        angRange = val +  2*gammaM
+        angStepSize = angRange / numProj
         maxbetaindex = angRange / angStepSize
         print(maxbetaindex)
-        for i in np.arange (0,10):
+        for i in np.arange (0,50):
             print(val)
-            beta = angStepSize
+            beta = val * i
             print(beta)
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
-            source_x = dSI * (cosBeta)
+            source_x = dSI * (-cosBeta)
             source_y = dSI * sinBeta
-            PP_Point_x = -detectorSize / 2 * sinBeta
+            PP_Point_x = detectorSize / 2 * -sinBeta
             PP_Point_y = detectorSize / 2 * (cosBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
             PP_vector = np.array(PP) * (-1)
-            #    print("sourcex : ", source_x,"sourcey : ",source_y)
-            #    print("PP_Point_x : " ,PP_Point_x,"PP_Point_y : ", PP_Point_y)
-            dirDetector = (PP) / np.linalg.norm(PP)
-            #    print("dirDetector   ",dirDetector)
+            dirDetector = preprocessing.normalize(PP_vector , norm='l2')
+            print("dirDetector   ",dirDetector)
+
             for t in range(0, int(detectorSizeIndex)):
                 stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
-                #        print("stepsDirection   ",stepsDirection)
-                P = np.array(PP) + (dirDetector * stepsDirection)
-                points = (source, P)
+                P = PP_vector + (dirDetector * stepsDirection)
+
                 distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
-                #        print("distance  " , distance)
+                points = (source, P)
+                print("distance  " , points)
                 x_coords, y_coords = zip(*points)
                 A = vstack([x_coords, ones(len(x_coords))]).T
                 m, c = lstsq(A, y_coords)[0]
@@ -90,11 +87,12 @@ class fanbeam_main(Ui_wid_FanRecont):
                     sum += img_interp_spline(current.item(0), current.item(1))
                 sum /= samplingRate
 
-                print("sum    ", sum)
+                #print("sum    ", sum)
 
-                # pixels = (i, t, 377)
-        '''
+                pixels = (i, t, sum)
+        fan_img.show()
 
+'''
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
         self.pB_PhantomSelect.clicked.connect(self.selectphantom)
@@ -131,6 +129,7 @@ class fanbeam_main(Ui_wid_FanRecont):
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
         self.image = np.asarray(Image.open(self.phantom_value[self.file_path]), dtype="int32")
+
 
 
 
