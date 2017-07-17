@@ -17,21 +17,21 @@ def interpolation_Image(arr):
     img_interp_spline = RectBivariateSpline(x=x, y=y, z=arr, bbox=[None, None, None, None], kx=3, ky=3, s=0)
     return img_interp_spline
 
-'''
-def radonRayDrivenApproach(img_interp_spline, dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+
+def radonRayDrivenApproach(arr, dSI, dDI, val, detectorSize, detectorSpacing, numProj):
 
         fan_img = Image.new('RGB', (377, 377), "black")  # create a new black image
         pixels = fan_img.load()
         detectorSizeIndex = (detectorSize / detectorSpacing)
-        gammaM = math.atan((detectorSize/2.0-0.5 ) / dSI)
-        angRange = val +  2*gammaM
+        gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
+        angRange = val + 2 * gammaM
         angStepSize = angRange / numProj
         samplingRate = 3.0
         maxbetaindex = angRange / angStepSize
-        print(maxbetaindex)
-        for i in np.arange (0,10):
-            print(val)
-            beta = angStepSize
+        #print(maxbetaindex)
+        for i in np.arange(0, 10):
+            #print(val)
+            beta = val * i
             print(beta)
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
@@ -41,8 +41,7 @@ def radonRayDrivenApproach(img_interp_spline, dSI, dDI, val, detectorSize, detec
             PP_Point_y = detectorSize / 2 * (cosBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
-            PP_vector = np.array(PP) * (-cosBeta)+ np.array(PP)* (-sinBeta)
-            print("sum    ", PP_vector)
+            PP_vector = np.array(PP) * (-cosBeta) + np.array(PP) * (-sinBeta)
             dirDetector = (PP) / np.linalg.norm(PP)
             #    print("dirDetector   ",dirDetector)
             for t in range(0, int(detectorSizeIndex)):
@@ -68,12 +67,14 @@ def radonRayDrivenApproach(img_interp_spline, dSI, dDI, val, detectorSize, detec
                             or ((current.item(0)) < 0) or ((current.item(1)) < 0):
                         continue
                     sum += img_interp_spline(current.item(0), current.item(1))
+                    #sum += np.interp(0 , source_x, source_y)
                 sum /= samplingRate
-
-
+                print("sum    ", sum)
                 pixels = (i, t, sum)
         return fan_img
-'''
+
+
+
 def plot_interp(image, img_):
     fig, axes = plt.subplots(1, 3)
     for ax, (im, text) in zip(axes, ((image, 'original'), (img_, 'interpolated'))):
@@ -84,12 +85,12 @@ def plot_interp(image, img_):
     plt.tight_layout(pad=0)
     plt.show()
 
-
+'''
 def radonRayDrivenApproach(img_interp_spline):
     for i in np.arange(0, 100):
         for j in np.arange(0, 100):
             img_ = img_interp_spline(i+0.5, j+0.5)
             print(img_)
             return img_
-
+'''
         

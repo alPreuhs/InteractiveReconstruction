@@ -17,7 +17,7 @@ arr = np.array(img)
 
 
 #pl(image)
-#fanogram = rrd((inter(arr)),231.2,105,50,318,1,377)
-fan = rrd(inter(arr))
-#pl(img,fanogram)
-pl(img,fan)
+fanogram = rrd(arr,231.2,105,10,318,1,377)
+#fan = rrd(inter(arr))
+pl(img,fanogram)
+#pl(img,fan)

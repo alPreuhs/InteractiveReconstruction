@@ -6,6 +6,7 @@ from numpy import ones,vstack
 from numpy.linalg import lstsq
 from PyQt5 import QtCore, QtGui, QtWidgets
 from fanGUI_Project import Ui_wid_FanRecont
+from numpy import linalg as LA
 from PhantomSelect_Window import selectPhantom
 from sklearn import preprocessing
 from sympy import Point3D, Line3D
@@ -35,40 +36,39 @@ class fanbeam_main(Ui_wid_FanRecont):
 
 
     def radonRayDrivenApproach(self,img_interp_spline,dSI,dDI,val,detectorSize,detectorSpacing,numProj):
-        rrd(img_interp_spline,dSI,dDI,val,detectorSize,detectorSpacing,numProj)
-'''
-        fan_img = Image.new('RGB',(377, 377), "black")  # create a new black image
+        #rrd(img_interp_spline,dSI,dDI,val,detectorSize,detectorSpacing,numProj)
+
+        fan_img = Image.new('RGB', (377, 377), "black")  # create a new black image
         pixels = fan_img.load()
         detectorSizeIndex = (detectorSize / detectorSpacing)
-        samplingRate = 3.0
-        gammaM = math.atan((detectorSize/2.0-0.5 ) / dSI)
-        angRange = val +  2*gammaM
+        gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
+        angRange = val + 2 * gammaM
         angStepSize = angRange / numProj
+        samplingRate = 3.0
         maxbetaindex = angRange / angStepSize
-        print(maxbetaindex)
-        for i in np.arange (0,50):
-            print(val)
+        #print(maxbetaindex)
+        for i in np.arange(0, 10):
+            #print(val)
             beta = val * i
             print(beta)
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
-            source_x = dSI * (-cosBeta)
+            source_x = dSI * (cosBeta)
             source_y = dSI * sinBeta
-            PP_Point_x = detectorSize / 2 * -sinBeta
+            PP_Point_x = -detectorSize / 2 * sinBeta
             PP_Point_y = detectorSize / 2 * (cosBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
-            PP_vector = np.array(PP) * (-1)
-            dirDetector = preprocessing.normalize(PP_vector , norm='l2')
-            print("dirDetector   ",dirDetector)
-
+            PP_vector = np.array(PP) * (-cosBeta) + np.array(PP) * (-sinBeta)
+            dirDetector = (PP) / np.linalg.norm(PP)
+            #    print("dirDetector   ",dirDetector)
             for t in range(0, int(detectorSizeIndex)):
                 stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
-                P = PP_vector + (dirDetector * stepsDirection)
-
-                distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
+                #        print("stepsDirection   ",stepsDirection)
+                P = np.array(PP) + (dirDetector * stepsDirection)
                 points = (source, P)
-                print("distance  " , points)
+                distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
+                #        print("distance  " , distance)
                 x_coords, y_coords = zip(*points)
                 A = vstack([x_coords, ones(len(x_coords))]).T
                 m, c = lstsq(A, y_coords)[0]
@@ -86,13 +86,11 @@ class fanbeam_main(Ui_wid_FanRecont):
                         continue
                     sum += img_interp_spline(current.item(0), current.item(1))
                 sum /= samplingRate
-
-                #print("sum    ", sum)
-
+                print("sum    ", sum)
                 pixels = (i, t, sum)
-        fan_img.show()
+        return fan_img
 
-'''
+
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
         self.pB_PhantomSelect.clicked.connect(self.selectphantom)
