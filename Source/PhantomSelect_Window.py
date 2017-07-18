@@ -20,7 +20,7 @@ class selectPhantom(Ui_Wid_PhantomSelect):
         i = 1
         j = 1
         files = []
-        for file in os.listdir("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction"):
+        for file in os.listdir("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/Resources"):
             if file.endswith(".png"):
                files.append(os.path.join(os.getcwd(), file))
 

@@ -46,9 +46,9 @@ class fanbeam_main(Ui_wid_FanRecont):
         angStepSize = angRange / numProj
         samplingRate = 3.0
         maxbetaindex = angRange / angStepSize
-        #print(maxbetaindex)
+        # print(maxbetaindex)
         for i in np.arange(0, 10):
-            #print(val)
+            # print(val)
             beta = val * i
             print(beta)
             cosBeta = math.cos(beta)
@@ -84,12 +84,12 @@ class fanbeam_main(Ui_wid_FanRecont):
                     if ((phantomWidth) <= ((current.item(0)) + 1)) or ((phantomHeight) <= ((current.item(1)) + 1)) \
                             or ((current.item(0)) < 0) or ((current.item(1)) < 0):
                         continue
-                    sum += img_interp_spline(current.item(0), current.item(1))
+                    # sum += img_interp_spline(current.item(0), current.item(1))
+                    sum += interpolate.interp1d(source_x + 0.5, source_y + 0.5)
                 sum /= samplingRate
                 print("sum    ", sum)
                 pixels = (i, t, sum)
         return fan_img
-
 
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
