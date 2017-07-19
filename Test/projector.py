@@ -21,8 +21,10 @@ def interpolation_Image(arr):
 
 def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
 
-        fan_img = Image.new('RGB', (377, 377), "black")  # create a new black image
-        pixels = fan_img.load()
+        #Defining the fanogram image
+        fanogram = Image.new('RGB', (377, 377), "black")  # create a new black image
+        pixels = fanogram.load()
+
         detectorSizeIndex = (detectorSize / detectorSpacing)
         gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
         angRange = val + 2 * gammaM
@@ -30,27 +32,36 @@ def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, nu
         samplingRate = 3.0
         maxbetaindex = angRange / angStepSize
         #print(maxbetaindex)
+
+        #iterate over the rotation angle
         for i in np.arange(0, 10):
             #print(val)
             beta = val * i
             print(beta)
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
+
+            #Compute source and detector points
             source_x = dSI * (cosBeta)
             source_y = dSI * sinBeta
             PP_Point_x = -detectorSize / 2 * sinBeta
             PP_Point_y = detectorSize / 2 * (cosBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
+
+            #Unit vector along the detector
             PP_vector = np.array(PP)
             PP_vector = np.multiply((-1),PP_vector)
             dirDetector = (PP_vector) / np.linalg.norm(PP_vector)
 
-            #    print("dirDetector   ",dirDetector)
+
+            #iterate over detector elements
             for t in range(0, int(detectorSizeIndex)):
+                #calculate detector bin positions
                 stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
-                #        print("stepsDirection   ",stepsDirection)
                 P = np.array(PP) + (dirDetector * stepsDirection)
+
+                #Straight line equation between souce and the detector bin
                 points = (source, P)
                 distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
                 #        print("distance  " , distance)
@@ -58,9 +69,12 @@ def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, nu
                 A = vstack([x_coords, ones(len(x_coords))]).T
                 m, c = lstsq(A, y_coords)[0]
                 straightline = "{m}x + {c}".format(m=m, c=c)
-                #        print (straightline)
+
+                #Normalised increment step
                 increment = 1.0 / distance * samplingRate
                 sum = 0.0
+
+                #integral along the line
                 for Linet in np.arange(0.0, distance * samplingRate):
                     current = np.array(source) + increment * Linet
                     #           print("current    ", current)
@@ -77,7 +91,7 @@ def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, nu
                 #sum /= samplingRate
                 #print("sum    ", sum)
                 #pixels = (i, t, sum)
-        #return fan_img
+        #return fanogram
 
 
 def plot_interp(image, img_):

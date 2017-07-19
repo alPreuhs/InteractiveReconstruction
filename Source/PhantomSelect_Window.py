@@ -1,10 +1,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 __all__ = [QtCore, QtGui, QtWidgets]
 import sys
-from PhantomSelect import Ui_Wid_PhantomSelect
-from fanGUI_Project import Ui_wid_FanRecont
+from Source.PhantomSelect import Ui_Wid_PhantomSelect
+from Source.fanGUI_Project import Ui_wid_FanRecont
 #from fangui_main import fanbeam_main
-import os
+import os,os.path
+import Resources
+
 
 class selectPhantom(Ui_Wid_PhantomSelect):
 
@@ -19,13 +21,15 @@ class selectPhantom(Ui_Wid_PhantomSelect):
     def listwidload(self):
         i = 1
         j = 1
+        path = "/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/Resources"
         files = []
-        for file in os.listdir("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/Resources"):
+        for file in os.listdir(path):
             if file.endswith(".png"):
                files.append(os.path.join(os.getcwd(), file))
 
         Phantom_Path = {}
         for x in files:
+            print(x)
             Phantom_Path["Phantom"+str(i)]  = x
             #print (Phantom_Path["Phantom"+str(i)])
             i=i+1

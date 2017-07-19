@@ -5,14 +5,13 @@ from scipy.interpolate import RectBivariateSpline
 from numpy import ones,vstack
 from numpy.linalg import lstsq
 from PyQt5 import QtCore, QtGui, QtWidgets
-from fanGUI_Project import Ui_wid_FanRecont
+from Source.fanGUI_Project import Ui_wid_FanRecont
 from numpy import linalg as LA
-from PhantomSelect_Window import selectPhantom
+from Source.PhantomSelect_Window import selectPhantom
 from sklearn import preprocessing
 from sympy import Point3D, Line3D
 import math
 import numpy as np
-from projector import radonRayDrivenApproach as rrd
 import matplotlib.pylab as plt
 
 
