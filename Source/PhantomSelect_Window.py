@@ -21,11 +21,12 @@ class selectPhantom(Ui_Wid_PhantomSelect):
     def listwidload(self):
         i = 1
         j = 1
-        path = "/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/Resources"
+        path = "../Resources"
         files = []
-        for file in os.listdir(path):
-            if file.endswith(".png"):
-               files.append(os.path.join(os.getcwd(), file))
+        for dirpath, _, filenames in os.walk(path):
+            for file in filenames:
+                if file.endswith(".png"):
+                    files.append(os.path.abspath(os.path.join(dirpath, file)))
 
         Phantom_Path = {}
         for x in files:
