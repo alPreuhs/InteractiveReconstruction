@@ -1,0 +1,11 @@
+#mac file 
+.DS_Store
+
+# project files
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
