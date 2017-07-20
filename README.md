@@ -1,4 +1,3 @@
 ## Motivation
 
-A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists.
-
+User Interface development to display the function of Fan beam Geometry.
