@@ -5,7 +5,7 @@ from PIL import Image
 from numpy import ones,vstack
 from numpy.linalg import lstsq
 from scipy.interpolate import RectBivariateSpline
-from scipy import interpolate
+from scipy.interpolate import interp1d
 import math
 import matplotlib.pylab as plt
 import numpy as np
@@ -20,10 +20,10 @@ def interpolation_Image(arr):
     return img_interp_spline
 
 
-def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
 
         #Defining the fanogram image
-        fanogram = Image.new('RGB', (377, 377), "black")  # create a new black image
+        fanogram = Image.new('RGB', (377, 377))  # create a new black image
         pixels = fanogram.load()
 
         detectorSizeIndex = (detectorSize / detectorSpacing)
@@ -52,7 +52,7 @@ def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, nu
 
             #Unit vector along the detector
             PP_vector = np.array(PP)
-            PP_vector = np.multiply((-1),PP_vector)
+            PP_vector = PP_vector * -1
             dirDetector = (PP_vector) / np.linalg.norm(PP_vector)
 
 
@@ -65,34 +65,27 @@ def radonRayDrivenApproach( arr,dSI, dDI, val, detectorSize, detectorSpacing, nu
                 #Straight line equation between souce and the detector bin
                 points = (source, P)
                 distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
-                #        print("distance  " , distance)
+                #print("distance  " , distance)
                 x_coords, y_coords = zip(*points)
                 A = vstack([x_coords, ones(len(x_coords))]).T
                 m, c = lstsq(A, y_coords)[0]
                 straightline = "{m}x + {c}".format(m=m, c=c)
+                #print("straightline  ", straightline)
 
                 #Normalised increment step
-                increment = 1.0 / distance * samplingRate
+                increment = 1.0 / distance
                 sum = 0.0
+                #print("increment      ",increment)
 
                 #integral along the line
-                for Linet in np.arange(0.0, distance * samplingRate):
-                    current = np.array(source) + increment * Linet
-                    #           print("current    ", current)
-                    phantomWidth = 377
-                    phantomHeight = 377
-                    if ((phantomWidth) <= ((current.item(0)) + 1)) or ((phantomHeight) <= ((current.item(1)) + 1)) \
-                            or ((current.item(0)) < 0) or ((current.item(1)) < 0):
-                        continue
-                    print("test    "  , current.item(0))
-                    print("test2      " ,current.item(1))
-                    print("test3      ", arr)
-                    #fan_img = img_interp_spline(current.item(0), current.item(1))
-                    #sum += np.interp( arr, current.item(0),current.item(1))
-                #sum /= samplingRate
-                #print("sum    ", sum)
-                #pixels = (i, t, sum)
-        #return fanogram
+                for Linet in np.arange(0.0, distance):
+                    current = source + increment * Linet
+                    #print("current      ", current)
+                    sum += img_interp_spline(current.item(0),current.item(1),arr)
+                    #sum += interp1d(current.item(0),current.item(1),"linear")
+                print("sum    ", sum)
+                pixels = (i, t, sum)
+        return fanogram
 
 
 def plot_interp(image, img_):
