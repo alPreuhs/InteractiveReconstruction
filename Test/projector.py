@@ -6,7 +6,15 @@ from numpy import ones,vstack
 from numpy.linalg import lstsq
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import interp1d
+from scipy import interpolate
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage.io import imread
+from skimage import data_dir
+from skimage.transform import radon, rescale
 import math
+
 import matplotlib.pylab as plt
 import numpy as np
 import sys
@@ -21,7 +29,11 @@ def interpolation_Image(arr):
 
 
 def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+        source_pos_x_list = []
+        source_pos_y_list = []
 
+        piercing_x = []
+        piercing_y = []
         #Defining the fanogram image
         fanogram = Image.new('RGB', (377, 377))  # create a new black image
         pixels = fanogram.load()
@@ -37,30 +49,39 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
         #iterate over the rotation angle
         for i in np.arange(0, 10):
             #print(val)
-            beta = val * i
-            print(beta)
+            beta = angStepSize * i+math.pi/2
+            #beta = val * i+math.pi/2
+            #print(beta)
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
 
             #Compute source and detector points
-            source_x = dSI * (cosBeta)
+            source_x = dSI * (-cosBeta)
             source_y = dSI * sinBeta
-            PP_Point_x = -detectorSize / 2 * sinBeta
-            PP_Point_y = detectorSize / 2 * (cosBeta)
+            PP_Point_x = dDI * cosBeta
+            PP_Point_y = dDI  * (-sinBeta)
             PP = (PP_Point_x, PP_Point_y)
             source = (source_x, source_y)
+            point = (cosBeta,sinBeta)
+
+            source_pos_x_list.append(source_x)
+            source_pos_y_list.append(source_y)
+            piercing_x.append(PP_Point_x)
+            piercing_y.append(PP_Point_y)
 
             #Unit vector along the detector
             PP_vector = np.array(PP)
-            PP_vector = PP_vector * -1
+            #print(PP_vector.size)
+            PP_vector = PP + point * (-1)
             dirDetector = (PP_vector) / np.linalg.norm(PP_vector)
+            #print(dirDetector)
 
 
             #iterate over detector elements
             for t in range(0, int(detectorSizeIndex)):
                 #calculate detector bin positions
                 stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
-                P = np.array(PP) + (dirDetector * stepsDirection)
+                P = PP + (dirDetector * stepsDirection)
 
                 #Straight line equation between souce and the detector bin
                 points = (source, P)
@@ -78,14 +99,25 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
                 #print("increment      ",increment)
 
                 #integral along the line
-                for Linet in np.arange(0.0, distance):
+                for Linet in np.arange(0, distance):
                     current = source + increment * Linet
+                    #current = np.array(current)
                     #print("current      ", current)
-                    sum += img_interp_spline(current.item(0),current.item(1),arr)
+                    #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
+                    # sum += img_interp_spline(current.item(0),current.item(1),arr)
                     #sum += interp1d(current.item(0),current.item(1),"linear")
-                print("sum    ", sum)
-                pixels = (i, t, sum)
+                #print("sum    ", sum)
+                fanogram = img_interp_spline(i, t)
+        # plt.plot(source_pos_x_list, source_pos_y_list)
+        # plt.show()
+        plt.plot(piercing_x, piercing_y)
+        plt.show()
+
+
         return fanogram
+
+
+
 
 
 def plot_interp(image, img_):
