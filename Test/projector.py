@@ -6,7 +6,15 @@ from numpy import ones,vstack
 from numpy.linalg import lstsq
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import interp1d
+from scipy import interpolate
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage.io import imread
+from skimage import data_dir
+from skimage.transform import radon, rescale
 import math
+
 import matplotlib.pylab as plt
 import numpy as np
 import sys
@@ -21,71 +29,89 @@ def interpolation_Image(arr):
 
 
 def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
-
+        #debugging arrays for showing the source positions
+        source_pos_x_list = []
+        source_pos_y_list = []
+        # debugging arrays for showing the piercing positions
+        piercing_x = []
+        piercing_y = []
+        
         #Defining the fanogram image
         fanogram = Image.new('RGB', (377, 377))  # create a new black image
         pixels = fanogram.load()
 
-        detectorSizeIndex = (detectorSize / detectorSpacing)
+        ##calculate index for detector pixels
+        detectorSizeIndex = (detectorSize / detectorSpacing) 
+        ## calculate fan angle
         gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
-        angRange = val + 2 * gammaM
+        ## calculate scanning range which is 180+fan angle (short scan)
+        angRange = val + 2 * gammaM        
+        ## calculate angular step size
         angStepSize = angRange / numProj
-        samplingRate = 3.0
-        maxbetaindex = angRange / angStepSize
-        #print(maxbetaindex)
 
         #iterate over the rotation angle
-        for i in np.arange(0, 10):
-            #print(val)
-            beta = val * i
-            print(beta)
+        for angle_index in np.arange(0, 10):
+            # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
+            beta = angStepSize * angle_index+math.pi/2
+
+            # calculate cos/sin
             cosBeta = math.cos(beta)
             sinBeta = math.sin(beta)
 
-            #Compute source and detector points
-            source_x = dSI * (cosBeta)
+            #compute source position
+            source_x = dSI * (-cosBeta)
             source_y = dSI * sinBeta
-            PP_Point_x = -detectorSize / 2 * sinBeta
-            PP_Point_y = detectorSize / 2 * (cosBeta)
+            source_position = (source_x, source_y)
+            #compute piercing point
+            PP_Point_x = dDI * cosBeta
+            PP_Point_y = dDI  * (-sinBeta)
             PP = (PP_Point_x, PP_Point_y)
-            source = (source_x, source_y)
 
-            #Unit vector along the detector
-            PP_vector = np.array(PP)
-            PP_vector = PP_vector * -1
-            dirDetector = (PP_vector) / np.linalg.norm(PP_vector)
-
+            #calculate direction orthogonal to central ray -> pointing parallel to detector 
+            ortho_direction = -np.array([sinBeta, cosBeta])
+            
+            ### add values for debugging 
+            source_pos_x_list.append(source_x)
+            source_pos_y_list.append(source_y)
+            piercing_x.append(PP_Point_x)
+            piercing_y.append(PP_Point_y)
 
             #iterate over detector elements
             for t in range(0, int(detectorSizeIndex)):
-                #calculate detector bin positions
-                stepsDirection = 0.5 * detectorSpacing + t * detectorSpacing
-                P = np.array(PP) + (dirDetector * stepsDirection)
+                
+                ##shift detector indices
+                t -= detectorSizeIndex*0.5
 
-                #Straight line equation between souce and the detector bin
-                points = (source, P)
-                distance = math.hypot(PP_Point_x - source_x, PP_Point_y - source_y)
-                #print("distance  " , distance)
-                x_coords, y_coords = zip(*points)
-                A = vstack([x_coords, ones(len(x_coords))]).T
-                m, c = lstsq(A, y_coords)[0]
-                straightline = "{m}x + {c}".format(m=m, c=c)
-                #print("straightline  ", straightline)
+                ## calculate world point for current pixel
+                pixel_position = PP + (t * detectorSpacing * ortho_direction)
+            
+                ## calculate distence between source position and detector pixel
+                distance = np.linalg.norm(pixel_position - np.array(source_position))
 
-                #Normalised increment step
-                increment = 1.0 / distance
+                #Define increment step
+                increment = 0.5
                 sum = 0.0
                 #print("increment      ",increment)
-
                 #integral along the line
-                for Linet in np.arange(0.0, distance):
-                    current = source + increment * Linet
+                
+                #Define maximal distance index
+                max_distance_index = int(distance/increment)
+                for line_index in np.arange(0, max_distance_index):
+                    current = source_position + increment * line_index
+                    #current = np.array(current)
                     #print("current      ", current)
-                    sum += img_interp_spline(current.item(0),current.item(1),arr)
+                    #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
+                    # sum += img_interp_spline(current.item(0),current.item(1),arr)
                     #sum += interp1d(current.item(0),current.item(1),"linear")
-                print("sum    ", sum)
-                pixels = (i, t, sum)
+                #print("sum    ", sum)
+                fanogram = img_interp_spline(angle_index, t)
+        # plt.plot(source_pos_x_list, source_pos_y_list)
+        # plt.show()
+        plt.plot(piercing_x, piercing_y, 'bo')
+        plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
+        plt.show()
         return fanogram
+
 
 
 def plot_interp(image, img_):
