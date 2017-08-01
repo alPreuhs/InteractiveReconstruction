@@ -13,7 +13,7 @@ from Test.projector import plot_interp as pl
 from PIL import Image
 
 '''
-image = imread("/Users/Janani/PycharmProjects/python_newproject/InteractiveReconstruction/Test/eclipse.png")
+image = imread("eclipse.png")
 fig, (ax1, ax2) = plt.subplots(1, 2)
 
 ax1.set_title("Original")

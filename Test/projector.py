@@ -40,7 +40,6 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
         fanogram = Image.new('RGB', (377, 377))  # create a new black image
         pixels = fanogram.load()
 
-
         ##calculate index for detector pixels
         detectorSizeIndex = (detectorSize / detectorSpacing) 
         ## calculate fan angle
@@ -52,8 +51,6 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
 
         #iterate over the rotation angle
         for angle_index in np.arange(0, 10):
-
-
             # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
             beta = angStepSize * angle_index+math.pi/2
 
@@ -78,10 +75,6 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
             source_pos_y_list.append(source_y)
             piercing_x.append(PP_Point_x)
             piercing_y.append(PP_Point_y)
-
-            
-
- 
 
             #iterate over detector elements
             for t in range(0, int(detectorSizeIndex)):
@@ -117,11 +110,7 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
         plt.plot(piercing_x, piercing_y, 'bo')
         plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
         plt.show()
-
-
         return fanogram
-
-
 
 
 
