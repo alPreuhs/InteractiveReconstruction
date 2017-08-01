@@ -33,7 +33,7 @@ plt.show()
 
 
 '''
-img = Image.open("/Users/Janani/PycharmProjects/pythonqt/InteractiveReconstruction/Test/circle.png")
+img = Image.open("circle.png")
 #img = mpimg.imread("/Users/Janani/Desktop/09.png")
 
 
@@ -41,7 +41,7 @@ arr = np.array(img)
 
 
 #pl(image)
-fanogram = rrd(arr,inter(arr),232,105,120,577,1,377)
+fanogram = rrd(arr,inter(arr),232,105,120,100,1,377)
 #fanogram = rrd(arr,inter(arr),1500,100,120,600,1,500)
 #fan = rrd(inter(arr))
 pl(img,fanogram)
