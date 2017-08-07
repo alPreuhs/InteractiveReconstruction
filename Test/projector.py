@@ -2,19 +2,13 @@
 from __future__ import division
 from __future__ import print_function
 from PIL import Image
-from numpy import ones,vstack
 from numpy.linalg import lstsq
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import interp1d
 from scipy import interpolate
 import numpy as np
 import matplotlib.pyplot as plt
-
-from skimage.io import imread
-from skimage import data_dir
-from skimage.transform import radon, rescale
 import math
-
 import matplotlib.pylab as plt
 import numpy as np
 import sys
@@ -28,7 +22,7 @@ def interpolation_Image(arr):
     return img_interp_spline
 
 
-def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+def radonRayDrivenApproach(arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
         #debugging arrays for showing the source positions
         source_pos_x_list = []
         source_pos_y_list = []
@@ -37,7 +31,7 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
         piercing_y = []
         
         #Defining the fanogram image
-        fanogram = Image.new('RGB', (377, 377))  # create a new black image
+        fanogram = Image.new('RGB', (1000,1000))  # create a new black image
         pixels = fanogram.load()
 
         ##calculate index for detector pixels
@@ -51,6 +45,7 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
 
         #iterate over the rotation angle
         for angle_index in np.arange(0, 10):
+
             # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
             beta = angStepSize * angle_index+math.pi/2
 
@@ -78,7 +73,7 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
 
             #iterate over detector elements
             for t in range(0, int(detectorSizeIndex)):
-                
+
                 ##shift detector indices
                 t -= detectorSizeIndex*0.5
 
@@ -98,17 +93,19 @@ def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, d
                 max_distance_index = int(distance/increment)
                 for line_index in np.arange(0, max_distance_index):
                     current = source_position + increment * line_index
-                    #current = np.array(current)
+                    current = np.array(current)
                     #print("current      ", current)
                     #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
-                    # sum += img_interp_spline(current.item(0),current.item(1),arr)
+                    #sum += img_interp_spline(current.item(0),current.item(1))
                     #sum += interp1d(current.item(0),current.item(1),"linear")
+                    #pixels[angle_index, t] = (angle_index, t, sum)
                 #print("sum    ", sum)
-                fanogram = img_interp_spline(angle_index, t)
+
         # plt.plot(source_pos_x_list, source_pos_y_list)
         # plt.show()
         plt.plot(piercing_x, piercing_y, 'bo')
         plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
+        plt.plot(arr)
         plt.show()
         return fanogram
 
