@@ -22,7 +22,7 @@ def interpolation_Image(arr):
     return img_interp_spline
 
 
-def radonRayDrivenApproach(arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+def radonRayDrivenApproach(img,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
         #debugging arrays for showing the source positions
         source_pos_x_list = []
         source_pos_y_list = []
@@ -31,8 +31,7 @@ def radonRayDrivenApproach(arr,img_interp_spline,dSI, dDI, val, detectorSize, de
         piercing_y = []
         
         #Defining the fanogram image
-        fanogram = Image.new('RGB', (1000,1000))  # create a new black image
-        pixels = fanogram.load()
+        fanogram = Image.new(img.mode, (377,377))  # create a new black image
 
         ##calculate index for detector pixels
         detectorSizeIndex = (detectorSize / detectorSpacing) 
@@ -94,9 +93,13 @@ def radonRayDrivenApproach(arr,img_interp_spline,dSI, dDI, val, detectorSize, de
                 for line_index in np.arange(0, max_distance_index):
                     current = source_position + increment * line_index
                     current = np.array(current)
+                    height , width = img.size
+                    X_Image = current.item(0) + height / 2
+                    Y_Image = current.item(1) + width / 2
+
                     #print("current      ", current)
                     #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
-                    #sum += img_interp_spline(current.item(0),current.item(1))
+                    fanogram = RectBivariateSpline((X_Image,Y_Image,img)
                     #sum += interp1d(current.item(0),current.item(1),"linear")
                     #pixels[angle_index, t] = (angle_index, t, sum)
                 #print("sum    ", sum)
@@ -105,7 +108,6 @@ def radonRayDrivenApproach(arr,img_interp_spline,dSI, dDI, val, detectorSize, de
         # plt.show()
         plt.plot(piercing_x, piercing_y, 'bo')
         plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
-        plt.plot(arr)
         plt.show()
         return fanogram
 

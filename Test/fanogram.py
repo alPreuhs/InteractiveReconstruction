@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 from Test.projector import plot_interp as pl
 from PIL import Image,ImageChops
 
+img = Image.open("circle.png")
+arr = np.array(img)
 
-
+'''
 #Method 1
 img = cv2.imread("circle.png",0)
-
 
 #img1 = Image.new( img.mode, img.size)
 #pixel_new = img1.load()
@@ -30,7 +31,7 @@ for i in range(0,rows):
         dst = cv2.warpAffine(img, M, (j, i))
 arr = -np.array(dst)
 
-'''
+
 img = cv2.imread("circle.png",0)
 rows,cols = img.shape
 
@@ -50,7 +51,7 @@ translate = img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f))
 arr = np.array(translate)
 '''
 #pl(image)
-fanogram = rrd(arr,inter(arr),300,205,120,100,1,377)
+fanogram = rrd(img,inter(arr),300,205,120,100,1,377)
 #fanogram = rrd(arr,inter(arr),1500,100,120,600,1,500)
 #fan = rrd(inter(arr))
 pl(img,fanogram)
