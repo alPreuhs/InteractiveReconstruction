@@ -99,7 +99,7 @@ def radonRayDrivenApproach(img,img_interp_spline,dSI, dDI, val, detectorSize, de
 
                     #print("current      ", current)
                     #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
-                    fanogram = RectBivariateSpline((X_Image,Y_Image,img)
+                    #fanogram = RectBivariateSpline((X_Image,Y_Image,img)
                     #sum += interp1d(current.item(0),current.item(1),"linear")
                     #pixels[angle_index, t] = (angle_index, t, sum)
                 #print("sum    ", sum)
