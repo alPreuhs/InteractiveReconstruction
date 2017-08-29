@@ -51,7 +51,7 @@ translate = img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f))
 arr = np.array(translate)
 '''
 #pl(image)
-fanogram = rrd(img,inter(arr),300,205,120,100,1,377)
+fanogram = rrd(img,inter(arr),500,50,20,500,1,377)
 #fanogram = rrd(arr,inter(arr),1500,100,120,600,1,500)
 #fan = rrd(inter(arr))
 pl(img,fanogram)
