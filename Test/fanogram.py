@@ -3,7 +3,7 @@ from __future__ import print_function
 from Test.projector import radonRayDrivenApproach as rrd
 from Test.projector import interpolation_Image as inter
 import numpy as np
-import cv2
+
 import matplotlib.pyplot as plt
 from Test.projector import plot_interp as pl
 from PIL import Image,ImageChops

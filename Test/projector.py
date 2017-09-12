@@ -1,8 +1,8 @@
-
 from __future__ import division
 from __future__ import print_function
 from PIL import Image
 from numpy.linalg import lstsq
+from pyconrad import PyConrad, ImageUtil, java_float_dtype
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import interp1d
 from scipy import interpolate
@@ -14,6 +14,10 @@ import matplotlib.pylab as plt
 import numpy as np
 import sys
 
+pyconrad = PyConrad()
+pyconrad.setup()
+pyconrad.start_conrad()
+
 
 def interpolation_Image(arr):
     x = np.arange(arr.shape[0])
@@ -22,8 +26,12 @@ def interpolation_Image(arr):
     img_interp_spline = RectBivariateSpline(x=x, y=y, z=arr, bbox=[None, None, None, None], kx=3, ky=3, s=0)
     return img_interp_spline
 
+
 def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, detectorSpacing, numProj):
     # debugging arrays for showing the source positions
+
+    imageGrid = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
+
     source_pos_x_list = []
     source_pos_y_list = []
     # debugging arrays for showing the piercing positions
@@ -34,8 +42,8 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
     cur_y = []
 
     # Defining the fanogram image
-    fanogram = Image.new(img.mode, (377, 377))  # create a new black image
-    pixels = fanogram.load()
+    #fanogram = Image.new(img.mode, (377, 377))  # create a new black image
+    #pixels = fanogram.load()
 
     ##calculate index for detector pixels
     detectorSizeIndex = (detectorSize / detectorSpacing)
@@ -45,10 +53,11 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
     angRange = math.pi + 2 * gammaM
     ## calculate angular step size
     angStepSize = angRange / numProj
-    maxBetaIndex = (int)(angRange / angStepSize);
+    maxBetaIndex = (int)(angRange / angStepSize)
+    fanogram = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377, 377)
 
     # iterate over the rotation angle
-    for angle_index in range(0, 10 ):
+    for angle_index in range(0, 10):
         # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
         beta = angStepSize * angle_index + math.pi / 2
 
@@ -84,7 +93,7 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
             pixel_position = PP + (t * detectorSpacing * ortho_direction)
 
             ## calculate distence between source position and detector pixel
-            distance = np.linalg.norm(pixel_position - np.array(source_position,dtype=Decimal))
+            distance = np.linalg.norm(pixel_position - np.array(source_position, dtype=Decimal))
 
             # Define increment step
             increment = 0.5
@@ -94,24 +103,30 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
 
             # Define maximal distance index
             max_distance_index = int(distance / increment)
-            #print(max_distance_index)
+            # print(max_distance_index)
             for line_index in np.arange(0, max_distance_index):
-                current = np.array(source_position,dtype=Decimal) + increment * line_index
+                current = np.array(source_position, dtype=Decimal) + increment * line_index
                 current = np.array(current)
                 height, width = img.size
                 X_Image = current.item(0) + (-width / 8)
                 Y_Image = current.item(1) + (-width * 1.3)
-
+                print(X_Image)
                 cur_x.append(X_Image)
                 cur_y.append(Y_Image)
-                sum += img_interp_spline(X_Image, Y_Image)
-                #print("X_Image      ", X_Image)
-                #print("Y_Image      ", Y_Image)
-                #print("current      ", current)
-             #pixels[t, angle_index] = (t, angle_index, sum)
-            #print("sum    ", sum)
-    #print("array    ", t ,angle_index)
-    print("sum    ", sum)
+
+                sum += pyconrad.classes.stanford.rsl.conrad.data.numeric.InterpolationOperators.interpolateLinear(imageGrid,
+                                                                                                                  X_Image,
+                                                                                                                  Y_Image)
+
+
+
+                # print("X_Image      ", X_Image)
+                # print("Y_Image      ", Y_Image)
+                # print("current      ", current)
+                # pixels[t, angle_index] = (t, angle_index, sum)
+                # print("sum    ", sum)
+                fanogram=fanogram.setAtIndex(t,angle_index,sum)
+
     plt.plot(img)
     plt.plot(piercing_x, piercing_y, 'bo')
     plt.plot(cur_x, cur_y, 'gx')
@@ -130,6 +145,7 @@ def plot_interp(image, img_):
     plt.tight_layout(pad=0)
     plt.show()
 
+
 '''
 def radonRayDrivenApproach(img_interp_spline):
     for i in np.arange(0, 100):
@@ -138,4 +154,3 @@ def radonRayDrivenApproach(img_interp_spline):
             print(img_)
             return img_
 '''
-        
