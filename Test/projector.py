@@ -30,7 +30,7 @@ def interpolation_Image(arr):
 def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, detectorSpacing, numProj):
     # debugging arrays for showing the source positions
 
-    imageGrid = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
+    #imageGrid = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
 
     source_pos_x_list = []
     source_pos_y_list = []
@@ -42,8 +42,8 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
     cur_y = []
 
     # Defining the fanogram image
-    #fanogram = Image.new(img.mode, (377, 377))  # create a new black image
-    #pixels = fanogram.load()
+    fanogram = Image.new(img.mode, (377, 377))  # create a new black image
+    pixels = fanogram.load()
 
     ##calculate index for detector pixels
     detectorSizeIndex = (detectorSize / detectorSpacing)
@@ -110,22 +110,22 @@ def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, 
                 height, width = img.size
                 X_Image = current.item(0) + (-width / 8)
                 Y_Image = current.item(1) + (-width * 1.3)
-                print(X_Image)
+                #print(X_Image)
                 cur_x.append(X_Image)
                 cur_y.append(Y_Image)
 
-                sum += pyconrad.classes.stanford.rsl.conrad.data.numeric.InterpolationOperators.interpolateLinear(imageGrid,
-                                                                                                                  X_Image,
-                                                                                                                  Y_Image)
-
+                #sum += pyconrad.classes.stanford.rsl.conrad.data.numeric.InterpolationOperators.interpolateLinear(imageGrid,
+                 #                                                                                                 X_Image,
+                  #                                                                                                Y_Image)
+                #fanogram = img_interp_spline(X_Image, Y_Image)
 
 
                 # print("X_Image      ", X_Image)
                 # print("Y_Image      ", Y_Image)
                 # print("current      ", current)
                 # pixels[t, angle_index] = (t, angle_index, sum)
-                # print("sum    ", sum)
-                fanogram=fanogram.setAtIndex(t,angle_index,sum)
+                print("sum    ", sum)
+                #fanogram=fanogram.setAtIndex(t,angle_index,sum)
 
     plt.plot(img)
     plt.plot(piercing_x, piercing_y, 'bo')
