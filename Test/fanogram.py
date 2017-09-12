@@ -2,57 +2,65 @@ from __future__ import division
 from __future__ import print_function
 from Test.projector import radonRayDrivenApproach as rrd
 from Test.projector import interpolation_Image as inter
+from pyconrad import PyConrad, ImageUtil, java_float_dtype
 import numpy as np
+import math
 
 import matplotlib.pyplot as plt
 from Test.projector import plot_interp as pl
 from PIL import Image,ImageChops
 
-img = Image.open("circle.png")
-arr = np.array(img)
+#Pyconrad
+pyconrad = PyConrad()
+pyconrad.setup()
+pyconrad.start_conrad()
 
-'''
-#Method 1
-img = cv2.imread("circle.png",0)
+####Declaration of variables
+gammaM = 11.768288932020647*math.pi/180
+maxT = (float)(500)
+deltaT = (float)(1.0)
+focalLength = (float)((maxT/2.0-0.5)*deltaT/math.tan(gammaM))
+maxBeta = (float)(285.95* math.pi/180)
+deltaBeta = (float)(maxBeta / 132)
+rayfil = (int) (maxT / deltaT)
 
-#img1 = Image.new( img.mode, img.size)
-#pixel_new = img1.load()
+####Input image
+img = Image.open("phantom.png")
+Phantom = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D.from_numpy(np.array(img))
 
-rows,cols = img.shape
-print(cols)
-offset_x = -188
-offset_y = -188
+#####Forward Projection
+Test = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(focalLength, maxBeta, deltaBeta, maxT, deltaT)
+fanogram = Test.projectRayDriven(Phantom)
+fanogram.show("Fanogram before filtering")
 
-for i in range(0,rows):
-    for j in range(0,cols):
-        row_new = offset_x + 1 * i
-        cols_new = offset_y + 1 * j
-        M = np.float32([[i, 0, row_new], [0, j, cols_new]])
-        dst = cv2.warpAffine(img, M, (j, i))
-arr = -np.array(dst)
+####Filtering
+
+######Adding redundancy weighting
+weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
+weight = pyconrad.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(focalLength, maxT, deltaT, maxBeta, deltaBeta)
+pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multiplyBy(fanogram, weight)
+weight.show("Weight")
+
+###Ray by ray filtering
+sizeimage =  fanogram.getSize()
+rbrfil = pyconrad.classes.stanford.rsl.tutorial.filters.RayByRayFiltering(rayfil , deltaT, 0.5,0.000200, 1., 1000000.0, 6, 405)
+print(sizeimage)
+
+for theta in range(0,132):
+    rbrfil.applyToGrid(fanogram.getSubGrid(theta))
+fanogram.show("After filtering")
+
+#####Backward Projection
+Test1 = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(focalLength,
+					deltaT, deltaBeta, 377, 377)
+baclpro = Test1.initSinogramParams(fanogram)
+back = Test1.backprojectRayDriven(fanogram)
+back.show("back projection")
 
 
-img = cv2.imread("circle.png",0)
-rows,cols = img.shape
-
-M = np.float32([[377,0,25],[0,377,25]])
-dst = cv2.warpAffine(img,M,(cols,rows))
-
-arr2 = np.array(img)
-
-img = Image.open("circle.png")
-a = 377
-b =0
-c = -188.5 # +left/-right
-d =0
-e = 377
-f = 188.5 # +up/-down
-translate = img.transform(img.size, Image.AFFINE, (a, b, c, d, e, f))
-arr = np.array(translate)
-'''
 #pl(image)
-fanogram = rrd(img,inter(arr),500,50,20,500,1,377)
+#fanogram = rrd(img,inter(arr),500,50,20,500,1,377)
 #fanogram = rrd(arr,inter(arr),1500,100,120,600,1,500)
 #fan = rrd(inter(arr))
-pl(img,fanogram)
+#pl(img,fanogram)
 #pl(img,fan)
