@@ -7,8 +7,12 @@ import numpy
 
 class CL:
     def __init__(self):
-        self.ctx = cl.create_some_context()
+        platform = cl.get_platforms()
+        my_gpu_devices = platform[1].get_devices(device_type=cl.device_type.GPU)
+        print(my_gpu_devices)
+        self.ctx = cl.Context(devices=my_gpu_devices)
         self.queue = cl.CommandQueue(self.ctx)
+
 
     def loadProgram(self, filename):
         #read in the OpenCL source file as a string
