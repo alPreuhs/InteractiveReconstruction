@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 __all__ = [QtCore, QtGui, QtWidgets]
 import sys
 from Source.PhantomSelect import Ui_Wid_PhantomSelect
-from Source.fanGUI_Project import Ui_wid_FanRecont
+from Source.fanGUI_Project import Ui_ReconstructionGUI
 #from fangui_main import fanbeam_main
 import os,os.path
 import Resources

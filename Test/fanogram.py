@@ -1,48 +1,75 @@
 from __future__ import division
 from __future__ import print_function
 import numpy as np
-from Test.projector import radonRayDrivenApproach as rrd
-from Test.projector import interpolation_Image as inter
-import numpy as np
-import matplotlib.pyplot as plt
+import math
+from PIL import Image,ImageChops
+from pyconrad import *
 
-from skimage.io import imread
-from skimage import data_dir
-from skimage.transform import radon, rescale
-from Test.projector import plot_interp as pl
-from PIL import Image
+jvm = PyConrad()
+jvm.setup()
+jvm.add_import('edu.stanford.rsl.conrad.data.numeric')
+jvm.add_import('edu.stanford.rsl.tutorial.phantoms')
+jvm.add_import('edu.stanford.rsl.conrad.phantom')
 
-'''
-image = imread("eclipse.png")
-fig, (ax1, ax2) = plt.subplots(1, 2)
+#Pyconrad
+pyconrad = PyConrad()
+pyconrad.setup()
+pyconrad.start_conrad()
 
-ax1.set_title("Original")
-ax1.imshow(image)
-
-#theta = np.linspace(0., 180., max(image.shape), endpoint=False)
-theta = np.linspace(0., 180., max(image.shape), endpoint=False)
-sinogram = radon(image, theta=theta, circle=True)
-ax2.set_title("Radon transform\n(Sinogram)")
-ax2.set_xlabel("Projection angle (deg)")
-ax2.set_ylabel("Projection position (pixels)")
-ax2.imshow(sinogram,
-           extent=(0, 180, 0, sinogram.shape[0]), aspect='auto')
-
-fig.tight_layout()
-plt.show()
-
-
-'''
-img = Image.open("circle.png")
-#img = mpimg.imread("/Users/Janani/Desktop/09.png")
+####Declaration of variables
+#gammaM = 11.768288932020647*2*math.pi/180
+#maxT = (float)(500)
+#deltaT = (float)(1.0)
+#focalLength = (float)((maxT/2.0-0.5)*deltaT/math.tan(gammaM))
+#maxBeta = (float)(285.95* math.pi/180)
+#deltaBeta = (float)(maxBeta / 132)
+maxT = (float)(600)
+focalLength = (float)(500)
+gammaM = math.atan((maxT/2.0-0.5 ) / focalLength)
+deltaT = (float)(1.0)
+numProj = 500
+maxBeta = math.pi +  2*gammaM;
+deltaBeta = (float)(maxBeta/numProj )
+rayfil = (int) (maxT / deltaT)
 
 
-arr = np.array(img)
+####Input image
+img = Image.open("phantom.png")
+Phantom = jvm['Grid2D'].from_numpy(np.array(img))
+Phantom.setOrigin(JArray(JDouble)([-(377 * Phantom.getSpacing()[0]) / 2, -(377 * Phantom.getSpacing()[1]) / 2 ]))
+Phantom.setSpacing(JArray(JDouble)([deltaT , deltaT]))
+Phantom.show()
 
+# Phantom = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D.from_numpy(np.array(img))
+#Phantom.setSpacing(deltaT , deltaT )
+#Phantom.setOrigin(-(377 * Phantom.getSpacing()[0]) / 2, -(377 * Phantom.getSpacing()[1]) / 2  )
 
-#pl(image)
-fanogram = rrd(arr,inter(arr),232,105,120,100,1,377)
-#fanogram = rrd(arr,inter(arr),1500,100,120,600,1,500)
-#fan = rrd(inter(arr))
-pl(img,fanogram)
-#pl(img,fan)f
+#####Forward Projection
+Test = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(focalLength, maxBeta, deltaBeta, maxT, deltaT)
+fanogram = Test.projectRayDriven(Phantom)
+fanogram.show("Fanogram before filtering")
+
+####Filtering
+
+######Adding redundancy weighting
+weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
+weight = pyconrad.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(focalLength, maxT, deltaT, maxBeta, deltaBeta)
+pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multiplyBy(fanogram, weight)
+weight.show("Weight")
+
+###Ramlak filtering
+sizeimage =  fanogram.getSize()
+ramlak = pyconrad.classes.stanford.rsl.tutorial.filters.RamLakKernel((int) (maxT / deltaT), deltaT)
+print(sizeimage)
+
+for theta in range(0,500):
+    ramlak.applyToGrid(fanogram.getSubGrid(theta))
+fanogram.show("After filtering")
+
+#####Backward Projection
+Test1 = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(focalLength,
+					deltaT, deltaBeta, 377, 377)
+baclpro = Test1.initSinogramParams(fanogram)
+back = Test1.backprojectRayDriven(fanogram)
+back.show("back projection")
+

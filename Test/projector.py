@@ -1,23 +1,22 @@
-
 from __future__ import division
 from __future__ import print_function
 from PIL import Image
-from numpy import ones,vstack
 from numpy.linalg import lstsq
+from pyconrad import PyConrad, ImageUtil, java_float_dtype
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import interp1d
 from scipy import interpolate
 import numpy as np
 import matplotlib.pyplot as plt
-
-from skimage.io import imread
-from skimage import data_dir
-from skimage.transform import radon, rescale
 import math
-
+from decimal import Decimal
 import matplotlib.pylab as plt
 import numpy as np
 import sys
+
+pyconrad = PyConrad()
+pyconrad.setup()
+pyconrad.start_conrad()
 
 
 def interpolation_Image(arr):
@@ -28,90 +27,112 @@ def interpolation_Image(arr):
     return img_interp_spline
 
 
-def radonRayDrivenApproach( arr,img_interp_spline,dSI, dDI, val, detectorSize, detectorSpacing, numProj):
-        #debugging arrays for showing the source positions
-        source_pos_x_list = []
-        source_pos_y_list = []
-        # debugging arrays for showing the piercing positions
-        piercing_x = []
-        piercing_y = []
-        
-        #Defining the fanogram image
-        fanogram = Image.new('RGB', (377, 377))  # create a new black image
-        pixels = fanogram.load()
+def radonRayDrivenApproach(img, img_interp_spline, dSI, dDI, val, detectorSize, detectorSpacing, numProj):
+    # debugging arrays for showing the source positions
 
-        ##calculate index for detector pixels
-        detectorSizeIndex = (detectorSize / detectorSpacing) 
-        ## calculate fan angle
-        gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
-        ## calculate scanning range which is 180+fan angle (short scan)
-        angRange = val + 2 * gammaM        
-        ## calculate angular step size
-        angStepSize = angRange / numProj
+    #imageGrid = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377,377)
 
-        #iterate over the rotation angle
-        for angle_index in np.arange(0, 10):
-            # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
-            beta = angStepSize * angle_index+math.pi/2
+    source_pos_x_list = []
+    source_pos_y_list = []
+    # debugging arrays for showing the piercing positions
+    piercing_x = []
+    piercing_y = []
 
-            # calculate cos/sin
-            cosBeta = math.cos(beta)
-            sinBeta = math.sin(beta)
+    cur_x = []
+    cur_y = []
 
-            #compute source position
-            source_x = dSI * (-cosBeta)
-            source_y = dSI * sinBeta
-            source_position = (source_x, source_y)
-            #compute piercing point
-            PP_Point_x = dDI * cosBeta
-            PP_Point_y = dDI  * (-sinBeta)
-            PP = (PP_Point_x, PP_Point_y)
+    # Defining the fanogram image
+    fanogram = Image.new(img.mode, (377, 377))  # create a new black image
+    pixels = fanogram.load()
 
-            #calculate direction orthogonal to central ray -> pointing parallel to detector 
-            ortho_direction = -np.array([sinBeta, cosBeta])
-            
-            ### add values for debugging 
-            source_pos_x_list.append(source_x)
-            source_pos_y_list.append(source_y)
-            piercing_x.append(PP_Point_x)
-            piercing_y.append(PP_Point_y)
+    ##calculate index for detector pixels
+    detectorSizeIndex = (detectorSize / detectorSpacing)
+    ## calculate fan angle
+    gammaM = math.atan((detectorSize / 2.0 - 0.5) / dSI)
+    ## calculate scanning range which is 180+fan angle (short scan)
+    angRange = math.pi + 2 * gammaM
+    ## calculate angular step size
+    angStepSize = angRange / numProj
+    maxBetaIndex = (int)(angRange / angStepSize)
+    fanogram = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(377, 377)
 
-            #iterate over detector elements
-            for t in range(0, int(detectorSizeIndex)):
-                
-                ##shift detector indices
-                t -= detectorSizeIndex*0.5
+    # iterate over the rotation angle
+    for angle_index in range(0, 10):
+        # calculate actual angle which are distributed equally over short scan range + 180 degree shift...
+        beta = angStepSize * angle_index + math.pi / 2
 
-                ## calculate world point for current pixel
-                pixel_position = PP + (t * detectorSpacing * ortho_direction)
-            
-                ## calculate distence between source position and detector pixel
-                distance = np.linalg.norm(pixel_position - np.array(source_position))
+        # calculate cos/sin
+        cosBeta = math.cos(beta)
+        sinBeta = math.sin(beta)
 
-                #Define increment step
-                increment = 0.5
-                sum = 0.0
-                #print("increment      ",increment)
-                #integral along the line
-                
-                #Define maximal distance index
-                max_distance_index = int(distance/increment)
-                for line_index in np.arange(0, max_distance_index):
-                    current = source_position + increment * line_index
-                    #current = np.array(current)
-                    #print("current      ", current)
-                    #sum = interpolate.Rbf(current.item(0),current.item(1),arr,function='linear')
-                    # sum += img_interp_spline(current.item(0),current.item(1),arr)
-                    #sum += interp1d(current.item(0),current.item(1),"linear")
-                #print("sum    ", sum)
-                fanogram = img_interp_spline(angle_index, t)
-        # plt.plot(source_pos_x_list, source_pos_y_list)
-        # plt.show()
-        plt.plot(piercing_x, piercing_y, 'bo')
-        plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
-        plt.show()
-        return fanogram
+        # compute source position
+        source_x = dSI * (-cosBeta)
+        source_y = dSI * sinBeta
+        source_position = (source_x, source_y)
+        # compute piercing point
+        PP_Point_x = dDI * cosBeta
+        PP_Point_y = dDI * (-sinBeta)
+        PP = (PP_Point_x, PP_Point_y)
 
+        # calculate direction orthogonal to central ray -> pointing parallel to detector
+        ortho_direction = -np.array([sinBeta, cosBeta])
+
+        ### add values for debugging
+        source_pos_x_list.append(source_x)
+        source_pos_y_list.append(source_y)
+        piercing_x.append(PP_Point_x)
+        piercing_y.append(PP_Point_y)
+
+        # iterate over detector elements
+        for t in range(0, int(detectorSizeIndex)):
+
+            ##shift detector indices
+            t -= detectorSizeIndex * 0.5
+
+            ## calculate world point for current pixel
+            pixel_position = PP + (t * detectorSpacing * ortho_direction)
+
+            ## calculate distence between source position and detector pixel
+            distance = np.linalg.norm(pixel_position - np.array(source_position, dtype=Decimal))
+
+            # Define increment step
+            increment = 0.5
+            sum = 0.0
+            # print("increment      ",increment)
+            # integral along the line
+
+            # Define maximal distance index
+            max_distance_index = int(distance / increment)
+            # print(max_distance_index)
+            for line_index in np.arange(0, max_distance_index):
+                current = np.array(source_position, dtype=Decimal) + increment * line_index
+                current = np.array(current)
+                height, width = img.size
+                X_Image = current.item(0) + (-width / 8)
+                Y_Image = current.item(1) + (-width * 1.3)
+                #print(X_Image)
+                cur_x.append(X_Image)
+                cur_y.append(Y_Image)
+
+                #sum += pyconrad.classes.stanford.rsl.conrad.data.numeric.InterpolationOperators.interpolateLinear(imageGrid,
+                 #                                                                                                 X_Image,
+                  #                                                                                                Y_Image)
+                #fanogram = img_interp_spline(X_Image, Y_Image)
+
+
+                # print("X_Image      ", X_Image)
+                # print("Y_Image      ", Y_Image)
+                # print("current      ", current)
+                # pixels[t, angle_index] = (t, angle_index, sum)
+                print("sum    ", sum)
+                #fanogram=fanogram.setAtIndex(t,angle_index,sum)
+
+    plt.plot(img)
+    plt.plot(piercing_x, piercing_y, 'bo')
+    plt.plot(cur_x, cur_y, 'gx')
+    plt.plot(source_pos_x_list, source_pos_y_list, 'rx')
+    plt.show()
+    return fanogram
 
 
 def plot_interp(image, img_):
@@ -124,6 +145,7 @@ def plot_interp(image, img_):
     plt.tight_layout(pad=0)
     plt.show()
 
+
 '''
 def radonRayDrivenApproach(img_interp_spline):
     for i in np.arange(0, 100):
@@ -132,4 +154,3 @@ def radonRayDrivenApproach(img_interp_spline):
             print(img_)
             return img_
 '''
-        
