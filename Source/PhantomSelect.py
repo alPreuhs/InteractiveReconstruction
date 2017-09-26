@@ -38,7 +38,7 @@ class Ui_Wid_PhantomSelect(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Wid_PhantomSelect = QtWidgets.QWidget()
+    Wid_PhantomSelect = QtWidgets.QMainWindow()
     ui = Ui_Wid_PhantomSelect()
     ui.setupUi(Wid_PhantomSelect)
     Wid_PhantomSelect.show()

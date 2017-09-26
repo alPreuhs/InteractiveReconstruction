@@ -2,13 +2,16 @@ from __future__ import division
 from __future__ import print_function
 from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Source.fanGUI_Project import Ui_wid_FanRecont
+from Source.fanGUI_Project import Ui_ReconstructionGUI
 from Source.PhantomSelect_Window import selectPhantom
 from pyconrad import *
 import math
 import numpy as np
 import qimage2ndarray
 import scipy.misc
+import sys
+
+
 
 jvm = PyConrad()
 jvm.setup()
@@ -22,12 +25,37 @@ pyconrad.setup()
 pyconrad.start_conrad()
 
 
-class fanbeam_main(Ui_wid_FanRecont):
+class fanbeam_main(Ui_ReconstructionGUI):
+    use_cl = True
 
     phantom_value = {}
     file_path = 'NULL'
 
 
+    def __init__(self, MainWindow):
+
+        Ui_ReconstructionGUI.__init__(self)
+        self.setupUi(MainWindow)
+
+
+        self.connect_threads()
+        self.PhantomSelect_click()
+        self.Xray_Clicked()
+        self.Reconst_Clicked()
+        self.Parkerweight_Check()
+        self.Ramlak_Check()
+
+    a=10
+
+    def connect_threads(self):
+        from Source.Threads.forward_projection_thread import forward_project_thread as fpt
+        self.forward = fpt()
+        #self.forward.finished.connect(self.on_fw_projection_finished)
+        self.forward.forward_project_finsihed.connect(self.on_fw_projection_finished)
+
+        from Source.Threads.back_projection_thread import back_project_thread as bpt
+        self.backward = bpt()
+        self.backward.back_project_finsihed.connect(self.on_bw_projection_finished)
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
         self.pB_PhantomSelect.clicked.connect(self.selectphantom)
@@ -109,9 +137,24 @@ class fanbeam_main(Ui_wid_FanRecont):
 
 
         ####Forward Projection
-        ForwardProj = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT,
-                                                                           self.deltaT)
-        self.fanogram = ForwardProj.projectRayDriven(Phantom)
+        ForwardProj = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
+
+
+
+
+        self.forward.init(self.use_cl, ForwardProj, Phantom)
+
+        print('befor')
+        self.forward.run()
+        print('agert')
+       # if self.use_cl:
+        #    self.fanogram = ForwardProj.projectRayDrivenCL(Phantom)
+       # else:
+        #    self.fanogram = ForwardProj.projectRayDriven(Phantom)
+
+    def on_fw_projection_finished(self):
+        print('here')
+        self.fanogram = self.forward.get_fanogram()
         self.fanogram_copy = self.fanogram
         self.fanogram.show("Fanogram before filtering")
 
@@ -172,7 +215,16 @@ class fanbeam_main(Ui_wid_FanRecont):
         Backprojection = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(self.focalLength, self.deltaT, self.deltaBeta, self.Phantomwidth,
                                                                                   self.Phantomheight)
         #baclpro = Test1.initSinogramParams(fanogram)
-        self.back = Backprojection.backprojectRayDriven(self.fanogram)
+        self.backward.init(self.use_cl, Backprojection, self.fanogram)
+        self.backward.run()
+        #if self.use_cl:
+        #    self.back = Backprojection.backprojectPixelDrivenCL(self.fanogram)
+        #else:
+        #    self.back = Backprojection.backprojectPixelDriven(self.fanogram)
+
+    def on_bw_projection_finished(self):
+        self.back = self.backward.get_backprojection()
+
         self.back.show("back projection")
 
 
@@ -202,17 +254,16 @@ class fanbeam_main(Ui_wid_FanRecont):
         #self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
 
 if __name__ == '__main__':
-    import sys
+
 
     app = QtWidgets.QApplication(sys.argv)
-    wid_FanRecont = QtWidgets.QWidget()
-    ui = fanbeam_main()
-    ui.setupUi(wid_FanRecont)
-    ui.PhantomSelect_click()
-    ui.Xray_Clicked()
-    ui.Reconst_Clicked()
-    ui.Parkerweight_Check()
-    ui.Ramlak_Check()
+    wid_FanRecont = QtWidgets.QMainWindow()
+    ui = fanbeam_main(wid_FanRecont)
+
+
+
+
+
     wid_FanRecont.show()
     sys.exit(app.exec_())
 
@@ -231,243 +282,4 @@ if __name__ == '__main__':
         self.Line3.setRotation(val)
         self.Ecllipse.setRotation(val)
         fanbeam_main.forwardProj(self)
-
-  '''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+'''

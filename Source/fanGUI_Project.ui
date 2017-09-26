@@ -1,173 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>wid_FanRecont</class>
- <widget class="QWidget" name="wid_FanRecont">
+ <class>ReconstructionGUI</class>
+ <widget class="QMainWindow" name="ReconstructionGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>869</width>
-    <height>633</height>
+    <width>904</width>
+    <height>682</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Fan Beam Reconstruction Interactive GUI</string>
+   <string>Reconstruction</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_8">
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_7">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPushButton" name="pB_PhantomSelect">
-           <property name="text">
-            <string>Select Phantom</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_Phantom">
-           <property name="text">
-            <string>Phantom</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGraphicsView" name="gV_Phantom">
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pB_Xray">
-           <property name="text">
-            <string>X-Ray</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_Sino">
-           <property name="text">
-            <string>Sinogram</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGraphicsView" name="gV_Sinogram">
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QPushButton" name="pB_Reconstruction">
-           <property name="text">
-            <string>Reconstruction</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_Backproj">
-           <property name="autoFillBackground">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Back Projection</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGraphicsView" name="gV_Backproj">
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_PhantomFFT">
-           <property name="text">
-            <string>Phantom FFT</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGraphicsView" name="gV_Phantom_FFT"/>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
-         <item>
-          <widget class="QCheckBox" name="checkBox_ParkerWeigh">
-           <property name="text">
-            <string>Parker Weighting</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox_RamLakFilter">
-           <property name="text">
-            <string>RamLak Filtering</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <widget class="QLabel" name="label_BackprojFFT">
-           <property name="text">
-            <string>Backprojection FFT</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGraphicsView" name="gV_Backproj_FFT"/>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-  </layout>
-  <zorder>pB_PhantomSelect</zorder>
-  <zorder>pB_Xray</zorder>
-  <zorder>pB_Reconstruction</zorder>
-  <zorder>gV_Phantom_FFT</zorder>
-  <zorder>gV_Backproj_FFT</zorder>
-  <zorder>checkBox_ParkerWeigh</zorder>
-  <zorder>checkBox_RamLakFilter</zorder>
-  <zorder>label_PhantomFFT</zorder>
-  <zorder>label_BackprojFFT</zorder>
-  <zorder>gV_Sinogram</zorder>
-  <zorder>label_Sino</zorder>
-  <zorder>gV_Phantom</zorder>
-  <zorder>label_Phantom</zorder>
-  <zorder>gV_Backproj</zorder>
-  <zorder>label_Backproj</zorder>
-  <zorder>frame_2</zorder>
-  <zorder>frame_3</zorder>
+  <widget class="QWidget" name="Reconstruction">
+   <layout class="QVBoxLayout" name="verticalLayout_8">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QPushButton" name="pB_PhantomSelect">
+            <property name="text">
+             <string>Select Phantom</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_Phantom">
+            <property name="text">
+             <string>Phantom</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="gV_Phantom">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QPushButton" name="pB_Xray">
+            <property name="text">
+             <string>X-Ray</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_Sino">
+            <property name="text">
+             <string>Sinogram</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="gV_Sinogram">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="pB_Reconstruction">
+            <property name="text">
+             <string>Reconstruction</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_Backproj">
+            <property name="autoFillBackground">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Back Projection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="gV_Backproj">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_PhantomFFT">
+            <property name="text">
+             <string>Phantom FFT</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="gV_Phantom_FFT"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QCheckBox" name="checkBox_ParkerWeigh">
+            <property name="text">
+             <string>Parker Weighting</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_RamLakFilter">
+            <property name="text">
+             <string>RamLak Filtering</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_BackprojFFT">
+            <property name="text">
+             <string>Backprojection FFT</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="gV_Backproj_FFT"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>904</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
