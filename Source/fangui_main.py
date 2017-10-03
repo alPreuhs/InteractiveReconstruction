@@ -26,7 +26,7 @@ pyconrad.start_conrad()
 
 
 class fanbeam_main(Ui_ReconstructionGUI):
-    use_cl = True
+    use_cl = False
 
     phantom_value = {}
     file_path = 'NULL'
@@ -36,14 +36,22 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         Ui_ReconstructionGUI.__init__(self)
         self.setupUi(MainWindow)
-
-
+        ####Declare Variables
+        self.maxT = (float)(600)
+        self.focalLength = (float)(500)
+        self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
+        self.deltaT = (float)(1.0)
+        self.numProj = 50
+        self.maxBeta = math.pi + 2 * self.gammaM
+        self.deltaBeta = (float)(self.maxBeta / self.numProj)
+        print(self.maxBeta,self.deltaBeta)
         self.connect_threads()
         self.PhantomSelect_click()
         self.Xray_Clicked()
         self.Reconst_Clicked()
         self.Parkerweight_Check()
         self.Ramlak_Check()
+        self.deltabetaslider_changed()
 
     a=10
 
@@ -56,6 +64,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         from Source.Threads.back_projection_thread import back_project_thread as bpt
         self.backward = bpt()
         self.backward.back_project_finsihed.connect(self.on_bw_projection_finished)
+
+
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
         self.pB_PhantomSelect.clicked.connect(self.selectphantom)
@@ -77,7 +87,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
     #Function for loading the phantom
     def Phantom_load(self):
         img_Phantom = QtGui.QImage(self.phantom_value[self.file_path])
-        img_Phantom = img_Phantom.scaled(self.gV_Phantom.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)
+        img_Phantom = img_Phantom.scaled(self.gV_Phantom.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatioByExpanding,transformMode=QtCore.Qt.FastTransformation)
         self.pix_Phantom = QtGui.QPixmap(img_Phantom)
         self.gps_Phantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
         self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
@@ -102,12 +112,17 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex.fftshift()
         grid2dcomplex.show("grid2complex display2")
 
-        #PhantomFFTarray = grid2dcomplex.as_numpy()
-        #self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
-        #self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(PhantomFFTarray)).scaled(self.gV_Phantom_FFT.size(),
-        #                                                                                                     aspectRatioMode=QtCore.Qt.KeepAspectRatio,
-        #                                                                                                    transformMode=QtCore.Qt.SmoothTransformation))
-        #self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
+        ####convert complex grid 2d to grid 2d
+        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getHeight(), grid2dcomplex.getWidth())
+
+        PhantomFFTarray = gridimage.as_numpy()
+        self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
+        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(PhantomFFTarray/90)).scaled(self.gV_Phantom_FFT.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation)))
+
+        self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
+        self.gV_Phantom_FFT.fitInView(self.gs_PhantomFFT.sceneRect())
+        self.gV_Phantom_FFT.setStyleSheet("background:black")
+        self.gs_PhantomFFT.update()
 
     #Xray button click for forward projection
     def Xray_Clicked(self):
@@ -116,16 +131,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ####forward projection
     def forwardProj(self):
-
-        ####Declare Variables
-        self.maxT = (float)(600)
-        self.focalLength = (float)(500)
-        self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
-        self.deltaT = (float)(1.0)
-        self.numProj = 500
-        self.maxBeta = math.pi + 2 * self.gammaM
-        self.deltaBeta = (float)(self.maxBeta / self.numProj)
-
 
         ####convert the input Phantom to array and set origin and spacing
         Phantom = jvm['Grid2D'].from_numpy(np.array(self.image))
@@ -138,15 +143,9 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         ####Forward Projection
         ForwardProj = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
-
-
-
-
         self.forward.init(self.use_cl, ForwardProj, Phantom)
-
-        print('befor')
         self.forward.run()
-        print('agert')
+
        # if self.use_cl:
         #    self.fanogram = ForwardProj.projectRayDrivenCL(Phantom)
        # else:
@@ -155,17 +154,38 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def on_fw_projection_finished(self):
         print('here')
         self.fanogram = self.forward.get_fanogram()
-        self.fanogram_copy = self.fanogram
-        self.fanogram.show("Fanogram before filtering")
+        self.fanogram_copy = jvm['Grid2D']
+        self.fanogram_copy = self.fanogram.clone()
+        self.fanogram_copy.show("Fanogram before filtering")
 
 
         #load the fanogram image
         fanogramarray = self.fanogram.as_numpy()
         self.gs_fanogram = QtWidgets.QGraphicsScene()
-        self.gs_fanogram.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(fanogramarray)).scaled(self.gV_Sinogram.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation))
+        self.gs_fanogram.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanogramarray/255))).scaled(self.gV_Sinogram.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation))
         self.gV_Sinogram.setScene(self.gs_fanogram)
         self.gV_Sinogram.setStyleSheet("background:black")
         self.gs_fanogram.update()
+        print('outside')
+        self.fanFFT()
+
+    def fanFFT(self):
+        grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.fanogram)
+        grid2dcomplex.transformForward()
+        grid2dcomplex.fftshift()
+        grid2dcomplex.show("grid2complex display")
+        ####convert complex grid 2d to grid 2d
+        print(grid2dcomplex.getHeight())
+
+        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
+        fanFFTarray = gridimage.as_numpy()
+        self.gs_fanFFT = QtWidgets.QGraphicsScene()
+        self.gs_fanFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanFFTarray/90)).scaled(self.gV_SinogramFFT.size(),
+                                                                                       aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+                                                                                       transformMode=QtCore.Qt.SmoothTransformation)))
+        self.gV_SinogramFFT.setScene(self.gs_fanFFT)
+        self.gV_SinogramFFT.setStyleSheet("background:black")
+        self.gs_fanFFT.update()
 
 
     def Parkerweight_Check(self):
@@ -176,12 +196,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.parkerweight()
         else:
             self.fanogram = self.fanogram_copy
-
-            self.fanogram.show()
+            self.fanogram.show("uncheck")
             print("inside parker")
 
     def parkerweight(self):
-        weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(self.Phantomwidth, self.Phantomheight)
+        #weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(self.Phantomwidth, self.Phantomheight)
         weight = pyconrad.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(self.focalLength, self.maxT, self.deltaT, self.maxBeta,self.deltaBeta)
         pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multiplyBy(self.fanogram, weight)
         weight.show()
@@ -194,15 +213,24 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.ramlakfilter()
         else:
             self.fanogram = self.fanogram_copy
+            self.fanogram.show("uncheck")
             print("inside ramlak")
 
     def ramlakfilter(self):
-        sizeimage = self.fanogram.getSize()
+        sizeimage = self.fanogram.getSize()[1]
         ramlak = pyconrad.classes.stanford.rsl.tutorial.filters.RamLakKernel((int)(self.maxT / self.deltaT), self.deltaT)
-
-        for theta in range(0, 500):
+        print(sizeimage)
+        for theta in range(0, sizeimage):
             ramlak.applyToGrid(self.fanogram.getSubGrid(theta))
         self.fanogram.show("After filtering")
+
+    def deltabetaslider_changed(self):
+        self.hSlider_deltabeta.valueChanged.connect(self.valuechange)
+
+    def valuechange(self):
+        self.deltaBeta = self.hSlider_deltabeta.value()
+        print(self.deltaBeta)
+
 
     ####Clicking the reconstruction button
     def Reconst_Clicked(self):
@@ -224,14 +252,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def on_bw_projection_finished(self):
         self.back = self.backward.get_backprojection()
-
         self.back.show("back projection")
-
-
         ######Display the backprojected image
         backarray = self.back.as_numpy()
         self.gs_backproj = QtWidgets.QGraphicsScene()
-        self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(backarray)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation))
+        self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backarray/255)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_Backproj.setScene(self.gs_backproj)
         self.gV_Backproj.setStyleSheet("background:black")
         self.gs_backproj.update()
@@ -244,14 +269,16 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
         grid2dcomplex.show("grid2complex display")
-
-        #PhantomFFTarray = grid2dcomplex.as_numpy()
-        #self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
-        #self.gs_PhantomFFT.addPixmap(
-         #   QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(PhantomFFTarray)).scaled(self.gV_Phantom_FFT.size(),
-          #                                                                               aspectRatioMode=QtCore.Qt.KeepAspectRatio,
-           #                                                                              transformMode=QtCore.Qt.SmoothTransformation))
-        #self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
+        ####convert complex grid 2d to grid 2d
+        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getHeight(), grid2dcomplex.getWidth())
+        backFFTarray = gridimage.as_numpy()
+        self.gs_backFFT = QtWidgets.QGraphicsScene()
+        self.gs_backFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backFFTarray/90)).scaled(self.gV_Backproj_FFT.size(),
+                                                                                        aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+                                                                                        transformMode=QtCore.Qt.SmoothTransformation)))
+        self.gV_Backproj_FFT.setScene(self.gs_PhantomFFT)
+        self.gV_Backproj_FFT.setStyleSheet("background:black")
+        self.gs_backFFT.update()
 
 if __name__ == '__main__':
 

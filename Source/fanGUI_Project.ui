@@ -6,160 +6,281 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>904</width>
-    <height>682</height>
+    <width>932</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Reconstruction</string>
   </property>
   <widget class="QWidget" name="Reconstruction">
-   <layout class="QVBoxLayout" name="verticalLayout_8">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_7">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QPushButton" name="pB_PhantomSelect">
-            <property name="text">
-             <string>Select Phantom</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_Phantom">
-            <property name="text">
-             <string>Phantom</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="gV_Phantom">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QPushButton" name="pB_Xray">
-            <property name="text">
-             <string>X-Ray</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_Sino">
-            <property name="text">
-             <string>Sinogram</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="gV_Sinogram">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QPushButton" name="pB_Reconstruction">
-            <property name="text">
-             <string>Reconstruction</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_Backproj">
-            <property name="autoFillBackground">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Back Projection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="gV_Backproj">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+     <layout class="QVBoxLayout" name="verticalLayout"/>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_Phantom">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Phantom</string>
+        </property>
+       </widget>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_PhantomFFT">
-            <property name="text">
-             <string>Phantom FFT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="gV_Phantom_FFT"/>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
-          <item>
-           <widget class="QCheckBox" name="checkBox_ParkerWeigh">
-            <property name="text">
-             <string>Parker Weighting</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="checkBox_RamLakFilter">
-            <property name="text">
-             <string>RamLak Filtering</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QLabel" name="label_BackprojFFT">
-            <property name="text">
-             <string>Backprojection FFT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="gV_Backproj_FFT"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_Sino">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Sinogram</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QLabel" name="label_Backproj">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Back Projection</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" rowspan="7">
+       <widget class="QPushButton" name="pB_PhantomSelect">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>S
+E
+L
+E
+C
+T
+  
+P
+H
+A
+N
+T
+O
+M</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QSlider" name="vSlider_maxbeta">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="7">
+       <widget class="QLabel" name="label_BackprojFFT">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Backprojection FFT</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="4">
+       <widget class="QLabel" name="label_Sinogram">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Sinogram FFT</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="7">
+       <widget class="QGraphicsView" name="gV_Backproj_FFT"/>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLabel" name="label_PhantomFFT">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Phantom FFT</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="7">
+       <widget class="QGraphicsView" name="gV_Backproj">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QSlider" name="hSlider_deltabeta">
+        <property name="maximum">
+         <number>180</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QGraphicsView" name="gV_Phantom_FFT"/>
+      </item>
+      <item row="7" column="4">
+       <widget class="QGraphicsView" name="gV_SinogramFFT"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QGraphicsView" name="gV_Phantom">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" rowspan="7">
+       <widget class="QPushButton" name="pB_Xray">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>X
+
+R
+A
+Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6" rowspan="7">
+       <widget class="QPushButton" name="pB_Reconstruction">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>R
+E
+C
+O
+N
+S
+T
+R
+U
+C
+T
+I
+O
+N</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QGraphicsView" name="gV_Sinogram">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QCheckBox" name="checkBox_ParkerWeigh">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Parker Weighting</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="4">
+       <widget class="QCheckBox" name="checkBox_RamLakFilter">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>RamLak Filtering</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
    </layout>
+   <zorder>gV_SinogramFFT</zorder>
+   <zorder>label_Sinogram</zorder>
+   <zorder>vSlider_maxbeta</zorder>
+   <zorder>hSlider_deltabeta</zorder>
+   <zorder>frame</zorder>
+   <zorder>frame_2</zorder>
+   <zorder>gV_Backproj</zorder>
+   <zorder></zorder>
+   <zorder></zorder>
+   <zorder></zorder>
+   <zorder>pB_Reconstruction</zorder>
+   <zorder>pB_Xray</zorder>
+   <zorder>pB_PhantomSelect</zorder>
+   <zorder></zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>904</width>
-     <height>26</height>
+     <width>932</width>
+     <height>17</height>
     </rect>
    </property>
   </widget>
