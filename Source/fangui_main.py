@@ -26,7 +26,7 @@ pyconrad.start_conrad()
 
 
 class fanbeam_main(Ui_ReconstructionGUI):
-    use_cl = False
+    use_cl = True
 
     phantom_value = {}
     file_path = 'NULL'
@@ -36,12 +36,16 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         Ui_ReconstructionGUI.__init__(self)
         self.setupUi(MainWindow)
+
+
         ####Declare Variables
-        self.maxT = (float)(600)
+        self.maxT = (float)(512)
         self.focalLength = (float)(500)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
-        self.numProj = 50
+        self.numProj = 180
+
+
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
         print(self.maxBeta,self.deltaBeta)
@@ -136,7 +140,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
         Phantom = jvm['Grid2D'].from_numpy(np.array(self.image))
         self.Phantomwidth = Phantom.getWidth()
         self.Phantomheight = Phantom.getHeight()
+
+
         Phantom.setOrigin(JArray(JDouble)([-(self.Phantomwidth * Phantom.getSpacing()[0]) / 2, -(self.Phantomheight * Phantom.getSpacing()[1]) / 2]))
+
+        #Phantom.setSpacing(JArray(JDouble)([0.05, 0.05]))
+
         Phantom.setSpacing(JArray(JDouble)([self.deltaT, self.deltaT]))
         Phantom.show("Phantom")
 
@@ -162,7 +171,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
         #load the fanogram image
         fanogramarray = self.fanogram.as_numpy()
         self.gs_fanogram = QtWidgets.QGraphicsScene()
-        self.gs_fanogram.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanogramarray/255))).scaled(self.gV_Sinogram.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation))
+
+        pixmap =  QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanogramarray / 255)))
+
+        pixmap = pixmap.scaled(self.gV_Sinogram.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+            transformMode=QtCore.Qt.FastTransformation)
+        self.gs_fanogram.addPixmap(pixmap)
         self.gV_Sinogram.setScene(self.gs_fanogram)
         self.gV_Sinogram.setStyleSheet("background:black")
         self.gs_fanogram.update()
