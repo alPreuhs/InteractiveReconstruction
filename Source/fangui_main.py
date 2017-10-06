@@ -39,23 +39,21 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
         ####Declare Variables
+        self.slidercheck = 0
         self.maxT = (float)(512)
         self.focalLength = (float)(500)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
         self.numProj = 180
-
-
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
-        print(self.maxBeta,self.deltaBeta)
         self.connect_threads()
         self.PhantomSelect_click()
         self.Xray_Clicked()
         self.Reconst_Clicked()
         self.Parkerweight_Check()
         self.Ramlak_Check()
-        self.deltabetaslider_changed()
+        self.deltabetaslider()
 
     a=10
 
@@ -135,17 +133,13 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ####forward projection
     def forwardProj(self):
-
+        if self.slidercheck == 1 :
+            self.deltaBeta = (float)(self.maxBeta / self.numProjSlider)
         ####convert the input Phantom to array and set origin and spacing
         Phantom = jvm['Grid2D'].from_numpy(np.array(self.image))
         self.Phantomwidth = Phantom.getWidth()
         self.Phantomheight = Phantom.getHeight()
-
-
         Phantom.setOrigin(JArray(JDouble)([-(self.Phantomwidth * Phantom.getSpacing()[0]) / 2, -(self.Phantomheight * Phantom.getSpacing()[1]) / 2]))
-
-        #Phantom.setSpacing(JArray(JDouble)([0.05, 0.05]))
-
         Phantom.setSpacing(JArray(JDouble)([self.deltaT, self.deltaT]))
         Phantom.show("Phantom")
 
@@ -161,8 +155,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         #    self.fanogram = ForwardProj.projectRayDriven(Phantom)
 
     def on_fw_projection_finished(self):
-        print('here')
         self.fanogram = self.forward.get_fanogram()
+        self.Checkflag = 0
         self.fanogram_copy = jvm['Grid2D']
         self.fanogram_copy = self.fanogram.clone()
         self.fanogram_copy.show("Fanogram before filtering")
@@ -180,7 +174,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Sinogram.setScene(self.gs_fanogram)
         self.gV_Sinogram.setStyleSheet("background:black")
         self.gs_fanogram.update()
-        print('outside')
         self.fanFFT()
 
     def fanFFT(self):
@@ -194,7 +187,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
         fanFFTarray = gridimage.as_numpy()
         self.gs_fanFFT = QtWidgets.QGraphicsScene()
-        self.gs_fanFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanFFTarray/90)).scaled(self.gV_SinogramFFT.size(),
+        self.gs_fanFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanFFTarray/255)).scaled(self.gV_SinogramFFT.size(),
                                                                                        aspectRatioMode=QtCore.Qt.KeepAspectRatio,
                                                                                        transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_SinogramFFT.setScene(self.gs_fanFFT)
@@ -208,10 +201,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def weightcheck(self):
         if self.checkBox_ParkerWeigh.isChecked():
             self.parkerweight()
+            self.Checkflag = 1
         else:
             self.fanogram = self.fanogram_copy
             self.fanogram.show("uncheck")
-            print("inside parker")
+            self.Checkflag = 0
 
     def parkerweight(self):
         #weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(self.Phantomwidth, self.Phantomheight)
@@ -225,10 +219,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def filtercheck(self):
         if self.checkBox_RamLakFilter.isChecked():
             self.ramlakfilter()
+            self.Checkflag = 1
         else:
             self.fanogram = self.fanogram_copy
             self.fanogram.show("uncheck")
-            print("inside ramlak")
+            self.Checkflag = 0
+
 
     def ramlakfilter(self):
         sizeimage = self.fanogram.getSize()[1]
@@ -238,12 +234,15 @@ class fanbeam_main(Ui_ReconstructionGUI):
             ramlak.applyToGrid(self.fanogram.getSubGrid(theta))
         self.fanogram.show("After filtering")
 
-    def deltabetaslider_changed(self):
-        self.hSlider_deltabeta.valueChanged.connect(self.valuechange)
 
-    def valuechange(self):
-        self.deltaBeta = self.hSlider_deltabeta.value()
-        print(self.deltaBeta)
+    def deltabetaslider(self):
+        self.hSlider_deltabeta.valueChanged.connect(self.deltabetaValue)
+
+    def deltabetaValue(self):
+        self.numProjSlider = self.hSlider_deltabeta.value()
+        self.slidercheck = 1
+        self.forwardProj()
+
 
 
     ####Clicking the reconstruction button
@@ -270,7 +269,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ######Display the backprojected image
         backarray = self.back.as_numpy()
         self.gs_backproj = QtWidgets.QGraphicsScene()
-        self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backarray/255)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
+        if self.Checkflag == 0 :
+           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backarray/255)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
+        else :
+           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(backarray).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_Backproj.setScene(self.gs_backproj)
         self.gV_Backproj.setStyleSheet("background:black")
         self.gs_backproj.update()

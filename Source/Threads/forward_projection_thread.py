@@ -15,7 +15,6 @@ class forward_project_thread(QtCore.QThread):
 
     def run(self):
         a = 10
-        print('asd')
 
         if self.use_cl:
             self.fanogram = self.ForwardProj.projectRayDrivenCL(self.Phantom)
