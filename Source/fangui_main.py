@@ -10,6 +10,8 @@ import numpy as np
 import qimage2ndarray
 import scipy.misc
 import sys
+import pygame
+import pygame.camera
 
 
 
@@ -40,11 +42,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         ####Declare Variables
         self.slidercheck = 0
-        self.maxT = (float)(512)
+        self.maxT = (float)(600)
         self.focalLength = (float)(500)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
-        self.numProj = 180
+        self.numProj = 1024
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
         self.connect_threads()
@@ -56,6 +58,16 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.deltabetaslider()
 
     a=10
+
+
+    def on_camera_button_clicked(self):
+        pygame.camera.init()
+        pygame.camera.list_cameras()
+        cam = pygame.camera.Camera()
+        cam.start()
+        img = cam.get_image()
+        pygame.image.save(img, r'C:\Users\z0038hzp.AD005\Desktop\camerashots\test.png')
+        ###
 
     def connect_threads(self):
         from Source.Threads.forward_projection_thread import forward_project_thread as fpt
