@@ -18,5 +18,4 @@ class back_project_thread(QtCore.QThread):
             self.back = self.Backprojection.backprojectPixelDrivenCL(self.fanogram)
         else:
             self.back = self.Backprojection.backprojectPixelDriven(self.fanogram)
-
         self.back_project_finsihed.emit('finished')

@@ -5,8 +5,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from Source.fanGUI_Project import Ui_ReconstructionGUI
 from Source.PhantomSelect_Window import selectPhantom
 from pyconrad import *
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+from skimage.io import imread, imsave
+from skimage.color import rgb2gray, rgb2grey
 from VideoCapture import Device
 import math
 import numpy as np
@@ -29,7 +29,7 @@ pyconrad.start_conrad()
 
 
 class fanbeam_main(Ui_ReconstructionGUI):
-    use_cl = True
+    use_cl = False
 
     phantom_value = {}
     file_path = 'NULL'
@@ -49,7 +49,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.focalLength = (float)(500)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
-        self.numProj = 50
+        self.numProj = 180
 
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
@@ -89,11 +89,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.load_image()
 
     def load_image(self):
-        self.Imagecapture_check = 0
-        self.img = Image.open('image.png').convert('LA')
-        self.matrix = scipy.misc.fromimage(self.img,0)
-        self.img.save('greyscale.png')
-        print (self.matrix)
+        self.Imagecapture_check = 1
+        self.img = imread('image.png')
+        img_gray = rgb2gray(self.img)
+        imsave("greyscale.png", img_gray)
         img_Phantom = QtGui.QImage('greyscale.png')
         img_Phantom = img_Phantom.scaled(self.gV_Phantom.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatioByExpanding,
                                          transformMode=QtCore.Qt.FastTransformation)
@@ -107,15 +106,28 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
-        self.image = Image.open('greyscale.png')
+        self.imagegray = Image.open('greyscale.png')
+        if self.Imagecapture_check == 1 :
+           self.image = self.imagegray
         self.Imgcapture_FFT()
 
     def Imgcapture_FFT(self):
-        self.ImgcaptureFFT = jvm['Grid2D'].from_numpy(np.array(self.matrix))
+        self.ImgcaptureFFT = jvm['Grid2D'].from_numpy(np.array(self.imagegray))
         grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.ImgcaptureFFT)
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
         grid2dcomplex.show("grid2complex display2")
+        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
+        self.ImgcaptureFFT = gridimage.as_numpy()
+        self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
+        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(self.ImgcaptureFFT/90 )).scaled(self.gV_Phantom_FFT.size(),
+                                                                               aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+                                                                               transformMode=QtCore.Qt.FastTransformation)))
+
+        self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
+        self.gV_Phantom_FFT.fitInView(self.gs_PhantomFFT.sceneRect())
+        self.gV_Phantom_FFT.setStyleSheet("background:black")
+        self.gs_PhantomFFT.update()
 
     #Logic for clicking the push button and getting new window
     def PhantomSelect_click(self):
@@ -157,7 +169,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.image = Image.open(self.phantom_value[self.file_path])
 
         else :
-            self.image = Image.open('greyscale.png')
+            self.image = self.imagegray
 
 
 
@@ -175,12 +187,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
         PhantomFFTarray = gridimage.as_numpy()
         low_values_indices = PhantomFFTarray < 0
         PhantomFFTarray[low_values_indices] = 0
-        max_PhantomFFTarray = np.amax(PhantomFFTarray)
+        max_PhantomFFTarray = np.max(PhantomFFTarray)
         print(max_PhantomFFTarray)
 
 
         self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
-        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(PhantomFFTarray/90)).scaled(self.gV_Phantom_FFT.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation)))
+        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(PhantomFFTarray/255)).scaled(self.gV_Phantom_FFT.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation)))
 
         self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
         self.gV_Phantom_FFT.fitInView(self.gs_PhantomFFT.sceneRect())
@@ -240,7 +252,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         #load the fanogram image
         fanogramarray = self.fanogram.as_numpy()
         self.gs_fanogram = QtWidgets.QGraphicsScene()
-        pixmap =  QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanogramarray / 255)))
+        pixmap =  QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(fanogramarray / 400)))
         pixmap = pixmap.scaled(self.gV_Sinogram.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatio,
             transformMode=QtCore.Qt.FastTransformation)
         self.gs_fanogram.addPixmap(pixmap)
@@ -261,6 +273,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         fanFFTarray = gridimage.as_numpy()
         low_values_indices = fanFFTarray < 0
         fanFFTarray[low_values_indices] = 0
+
 
         self.gs_fanFFT = QtWidgets.QGraphicsScene()
         self.gs_fanFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanFFTarray/255)).scaled(self.gV_SinogramFFT.size(),
@@ -381,6 +394,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
                                                                                   self.Phantomheight)
         self.backward.init(self.use_cl, Backprojection, self.fanogram)
         self.backward.run()
+
         #if self.use_cl:
         #    self.back = Backprojection.backprojectPixelDrivenCL(self.fanogram)
         #else:
@@ -389,11 +403,17 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def on_bw_projection_finished(self):
         self.back = self.backward.get_backprojection()
         self.back.show("back projection")
+        print("test")
         ######Display the backprojected image
         backarray = self.back.as_numpy()
+        low_values_indices = backarray < 0
+        backarray[low_values_indices] = 0
+
+
         self.gs_backproj = QtWidgets.QGraphicsScene()
         if self.Checkflag == 0 :
-           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backarray/255)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
+           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backarray/400)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
+
         else :
            self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(backarray).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_Backproj.setScene(self.gs_backproj)
@@ -409,10 +429,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex.fftshift()
         grid2dcomplex.show("grid2complex display")
         ####convert complex grid 2d to grid 2d
-        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getHeight(), grid2dcomplex.getWidth())
+        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
+        print("inside")
         backFFTarray = gridimage.as_numpy()
         self.gs_backFFT = QtWidgets.QGraphicsScene()
-        self.gs_backFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(backFFTarray/90)).scaled(self.gV_Backproj_FFT.size(),
+        self.gs_backFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backFFTarray/400)).scaled(self.gV_Backproj_FFT.size(),
                                                                                         aspectRatioMode=QtCore.Qt.KeepAspectRatio,
                                                                                         transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_Backproj_FFT.setScene(self.gs_PhantomFFT)
