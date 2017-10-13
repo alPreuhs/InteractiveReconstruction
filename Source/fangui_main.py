@@ -13,7 +13,8 @@ import numpy as np
 import qimage2ndarray
 import scipy.misc
 import sys
-
+import pygame
+import pygame.camera
 
 
 jvm = PyConrad()
@@ -29,7 +30,7 @@ pyconrad.start_conrad()
 
 
 class fanbeam_main(Ui_ReconstructionGUI):
-    use_cl = False
+    use_cl = True
 
     phantom_value = {}
     file_path = 'NULL'
@@ -45,11 +46,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.slidercheck = 0
         self.maxslidercheck = 0
         self.Imagecapture_check = 0
-        self.maxT = (float)(512)
-        self.focalLength = (float)(500)
+        self.maxT = (float)(1300)
+        self.focalLength = (float)(2400)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
-        self.numProj = 180
+        self.numProj = 1024
 
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
@@ -84,8 +85,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ##Capturing the image
     def imagecapture(self):
-        cam = Device()
-        cam.saveSnapshot('image.png')
+        pygame.camera.init()
+        pygame.camera.list_cameras()
+        cam = pygame.camera.Camera()
+        cam.start()
+        img = cam.get_image()
+        pygame.image.save(img, r'image.png')
         self.load_image()
 
     def load_image(self):
@@ -407,6 +412,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ######Display the backprojected image
         backarray = self.back.as_numpy()
         low_values_indices = backarray < 0
+
         backarray[low_values_indices] = 0
 
 
