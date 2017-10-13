@@ -31,6 +31,7 @@ pyconrad.start_conrad()
 class fanbeam_main(Ui_ReconstructionGUI):
     use_cl = False
 
+
     phantom_value = {}
     file_path = 'NULL'
 
@@ -43,13 +44,17 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         ####Declare Variables
         self.slidercheck = 0
+        self.imagecapcheckflag  = 0
+        self.ParkerCheckflag = 0
+        self.ramlakCheckflag = 0
+        self.cosineCheckflag = 0
         self.maxslidercheck = 0
         self.Imagecapture_check = 0
         self.maxT = (float)(512)
         self.focalLength = (float)(500)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
-        self.numProj = 180
+        self.numProj = 10
 
         self.maxBeta = math.pi + 2 * self.gammaM
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
@@ -60,10 +65,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.Reconst_Clicked()
         self.Parkerweight_Check()
         self.Ramlak_Check()
-        self.deltabetaslider()
-        self.deltaslidertext()
-        self.maxbetaslider()
-        self.maxslidertext()
+        self.cosine_Check()
+        self.deltabetascroll()
+        self.deltascrolltext()
+        self.maxbetascroll()
+        self.maxscrolltext()
 
     a=10
 
@@ -80,6 +86,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ##Logic for clicking the live image capture button
     def imagecapture_click(self):
+        self.imagecapcheckflag = 1
         self.pB_videocapture.clicked.connect(self.imagecapture)
 
     ##Capturing the image
@@ -96,19 +103,18 @@ class fanbeam_main(Ui_ReconstructionGUI):
         img_Phantom = QtGui.QImage('greyscale.png')
         img_Phantom = img_Phantom.scaled(self.gV_Phantom.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatioByExpanding,
                                          transformMode=QtCore.Qt.FastTransformation)
-        self.pix_Phantom = QtGui.QPixmap(img_Phantom)
-        self.gps_Phantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
-        self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
-        # self.gps_Line = QtWidgets.QGraphicsLineItem()
-        self.gs_Phantom = QtWidgets.QGraphicsScene()
-        self.gs_Phantom.clear()
-        self.gs_Phantom.addItem(self.gps_Phantom)
-        self.gV_Phantom.setScene(self.gs_Phantom)
+        self.pix_ImgPhantom = QtGui.QPixmap(img_Phantom)
+        self.gps_ImgPhantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_ImgPhantom)
+        self.gps_ImgPhantom = QtWidgets.QGraphicsPixmapItem(self.pix_ImgPhantom)
+        self.gs_ImgPhantom = QtWidgets.QGraphicsScene()
+        self.gs_ImgPhantom.clear()
+        self.gs_ImgPhantom.addItem(self.gps_ImgPhantom)
+        self.gV_Phantom.setScene(self.gs_ImgPhantom)
         self.gV_Phantom.setStyleSheet("background:black")
-        self.gs_Phantom.update()
+        self.gs_ImgPhantom.update()
         self.imagegray = Image.open('greyscale.png')
-        if self.Imagecapture_check == 1 :
-           self.image = self.imagegray
+        #if self.Imagecapture_check == 1 :
+        self.image = self.imagegray
         self.Imgcapture_FFT()
 
     def Imgcapture_FFT(self):
@@ -119,8 +125,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex.show("grid2complex display2")
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
         self.ImgcaptureFFT = gridimage.as_numpy()
+        max_PhantomFFTarray = np.max(self.ImgcaptureFFT)
+        self.ImgcaptureFFT[self.ImgcaptureFFT < 0] = 0
         self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
-        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(self.ImgcaptureFFT/90 )).scaled(self.gV_Phantom_FFT.size(),
+        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(self.ImgcaptureFFT/255)).scaled(self.gV_Phantom_FFT.size(),
                                                                                aspectRatioMode=QtCore.Qt.KeepAspectRatio,
                                                                                transformMode=QtCore.Qt.FastTransformation)))
 
@@ -154,22 +162,17 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.pix_Phantom = QtGui.QPixmap(img_Phantom)
         self.gps_Phantom_placeholder = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
         self.gps_Phantom = QtWidgets.QGraphicsPixmapItem(self.pix_Phantom)
-        #self.gps_Line = QtWidgets.QGraphicsLineItem()
         self.gs_Phantom = QtWidgets.QGraphicsScene()
         self.gs_Phantom.clear()
         self.gs_Phantom.addItem(self.gps_Phantom)
-        #self.Ecllipse = self.gs_Phantom.addEllipse(0,0,25,25,QtCore.Qt.white)
-        #self.Line1 = self.gs_Phantom.addLine(20, 20, 150, 375, QtCore.Qt.white)
-        #self.Line2 = self.gs_Phantom.addLine(20, 20, 375,150, QtCore.Qt.white)
-        #self.Line3 = self.gs_Phantom.addLine(150, 375, 375, 150, QtCore.Qt.white)
         self.gV_Phantom.setScene(self.gs_Phantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.gs_Phantom.update()
-        if self.Imagecapture_check == 0 :
-            self.image = Image.open(self.phantom_value[self.file_path])
+        #if self.Imagecapture_check == 0 :
+        self.image = Image.open(self.phantom_value[self.file_path])
 
-        else :
-            self.image = self.imagegray
+       #else :
+            #self.image = self.imagegray
 
 
 
@@ -185,11 +188,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getHeight(), grid2dcomplex.getWidth())
 
         PhantomFFTarray = gridimage.as_numpy()
-        low_values_indices = PhantomFFTarray < 0
-        PhantomFFTarray[low_values_indices] = 0
         max_PhantomFFTarray = np.max(PhantomFFTarray)
-        print(max_PhantomFFTarray)
+        PhantomFFTarray[PhantomFFTarray<0] = 0
 
+        print(max_PhantomFFTarray)
 
         self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
         self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(PhantomFFTarray/255)).scaled(self.gV_Phantom_FFT.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation)))
@@ -243,16 +245,28 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def on_fw_projection_finished(self):
         self.fanogram = self.forward.get_fanogram()
-        self.Checkflag = 0
         self.fanogram_copy = jvm['Grid2D']
         self.fanogram_copy = self.fanogram.clone()
         self.fanogram_copy.show("Fanogram before filtering")
+        if self.ParkerCheckflag == 1:
+            self.parkerweight()
+            self.fanogram = self.fanogram_parkerweig
+        if self.cosineCheckflag == 1:
+            self.cosinefilter()
+            self.fanogram = self.fanogram_cosine
+        if self.ramlakCheckflag == 1:
+            self.ramlakfilter()
+            self.fanogram = self.fanogram_ramlak
 
+        self.fan_load()
+
+
+    def fan_load(self):
 
         #load the fanogram image
         fanogramarray = self.fanogram.as_numpy()
         self.gs_fanogram = QtWidgets.QGraphicsScene()
-        pixmap =  QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(fanogramarray / 400)))
+        pixmap =  QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(fanogramarray / 200)))
         pixmap = pixmap.scaled(self.gV_Sinogram.size(), aspectRatioMode=QtCore.Qt.KeepAspectRatio,
             transformMode=QtCore.Qt.FastTransformation)
         self.gs_fanogram.addPixmap(pixmap)
@@ -267,7 +281,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex.fftshift()
         grid2dcomplex.show("grid2complex display")
         ####convert complex grid 2d to grid 2d
-        print(grid2dcomplex.getHeight())
 
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
         fanFFTarray = gridimage.as_numpy()
@@ -290,16 +303,20 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def weightcheck(self):
         if self.checkBox_ParkerWeigh.isChecked():
             self.parkerweight()
-            self.Checkflag = 1
+            self.ParkerCheckflag = 1
         else:
             self.fanogram = self.fanogram_copy
             self.fanogram.show("uncheck")
-            self.Checkflag = 0
+            self.ParkerCheckflag = 0
+            self.fan_load()
 
     def parkerweight(self):
         #weight = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2D(self.Phantomwidth, self.Phantomheight)
         weight = pyconrad.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(self.focalLength, self.maxT, self.deltaT, self.maxBeta,self.deltaBeta)
         pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multiplyBy(self.fanogram, weight)
+        self.fanogram_parkerweig = jvm['Grid2D']
+        self.fanogram_parkerweig = self.fanogram
+        self.fan_load()
         weight.show()
 
     def Ramlak_Check(self):
@@ -308,11 +325,13 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def filtercheck(self):
         if self.checkBox_RamLakFilter.isChecked():
             self.ramlakfilter()
-            self.Checkflag = 1
+            self.fan_load()
+            self.ramlakCheckflag = 1
         else:
             self.fanogram = self.fanogram_copy
             self.fanogram.show("uncheck")
-            self.Checkflag = 0
+            self.ramlakCheckflag = 0
+            self.fan_load()
 
 
     def ramlakfilter(self):
@@ -321,7 +340,9 @@ class fanbeam_main(Ui_ReconstructionGUI):
         print(sizeimage)
         for theta in range(0, sizeimage):
             ramlak.applyToGrid(self.fanogram.getSubGrid(theta))
-        self.fanogram.show("After filtering")
+        self.fanogram.show("After  ramlak filtering")
+        self.fanogram_ramlak = jvm['Grid2D']
+        self.fanogram_ramlak = self.fanogram
 
     def cosine_Check(self):
         self.checkBox_cosine.stateChanged.connect(self.cosinecheck)
@@ -329,11 +350,13 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def cosinecheck(self):
         if self.checkBox_cosine.isChecked():
             self.cosinefilter()
-            self.Checkflag = 1
+            self.cosineCheckflag = 1
+            self.fan_load()
         else:
             self.fanogram = self.fanogram_copy
             self.fanogram.show("uncheck")
-            self.Checkflag = 0
+            self.cosineCheckflag = 0
+            self.fan_load()
 
 
     def cosinefilter(self):
@@ -342,37 +365,37 @@ class fanbeam_main(Ui_ReconstructionGUI):
         print(sizeimage)
         for theta in range(0, sizeimage):
             cosine.applyToGrid(self.fanogram.getSubGrid(theta))
-        self.fanogram.show("After filtering")
+        self.fanogram.show("After cosine filtering")
+        self.fanogram_cosine = jvm['Grid2D']
+        self.fanogram_cosine = self.fanogram
 
-    def deltabetaslider(self):
-        self.hSlider_deltabeta.valueChanged.connect(self.deltabetaValue)
+    def deltabetascroll(self):
+        self.hScrollBar_deltabeta.valueChanged.connect(self.deltabetaValue)
 
-    def deltaslidertext(self):
-        self.hSlider_deltabeta.valueChanged.connect(self.deltabetatext)
+    def deltascrolltext(self):
+        self.hScrollBar_deltabeta.valueChanged.connect(self.deltabetatext)
 
     def deltabetaValue(self):
-        self.numProjSlider = self.hSlider_deltabeta.value()
+        self.numProjSlider = self.hScrollBar_deltabeta.value()
         self.slidercheck = 1
-        self.forwardProj()
 
     def deltabetatext(self):
-        self.label_Hslidervalue.setAlignment((QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter))
-        self.label_Hslidervalue.setText("Stepsize: {}/{}".format(self.hSlider_deltabeta.maximum(),self.numProjSlider))
+        #self.label_delta.setAlignment((QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter))
+        self.label_delta.setText("Sampling density: {}/{}".format(self.hScrollBar_deltabeta.maximum(),self.numProjSlider))
 
-    def maxbetaslider(self):
-        self.vSlider_maxbeta.valueChanged.connect(self.maxbetaValue)
+    def maxbetascroll(self):
+        self.hScrollBar_maxbeta.valueChanged.connect(self.maxbetaValue)
 
-    def maxslidertext(self):
-        self.vSlider_maxbeta.valueChanged.connect(self.maxbetatext)
+    def maxscrolltext(self):
+        self.hScrollBar_maxbeta.valueChanged.connect(self.maxbetatext)
 
     def maxbetaValue(self):
-        self.maxSlider = self.vSlider_maxbeta.value()
+        self.maxSlider = self.hScrollBar_maxbeta.value()
         self.maxslidercheck = 1
-        self.forwardProj()
 
     def maxbetatext(self):
-        self.label_Vslidervalue.setAlignment((QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter))
-        self.label_Vslidervalue.setText("Rotation Angle: {}/{}".format(self.vSlider_maxbeta.maximum(),self.maxSlider))
+        #self.label_max.setAlignment((QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter))
+        self.label_max.setText("Rotation Angle: {}/{}".format(self.hScrollBar_maxbeta.maximum(),self.maxSlider))
 
     ####Clicking the reconstruction button
     def Reconst_Clicked(self):
@@ -411,9 +434,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
         self.gs_backproj = QtWidgets.QGraphicsScene()
-        if self.Checkflag == 0 :
-           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backarray/400)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
-
+        if self.ParkerCheckflag == 0 or self.cosineCheckflag == 0 or self.ramlakCheckflag == 0 :
+           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backarray/300)).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
+        elif self.imagecapcheckflag == 1:
+           self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(backarray/255).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
         else :
            self.gs_backproj.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(backarray).scaled(self.gV_Backproj.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.SmoothTransformation)))
         self.gV_Backproj.setScene(self.gs_backproj)
@@ -427,15 +451,14 @@ class fanbeam_main(Ui_ReconstructionGUI):
         grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.back)
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
-        grid2dcomplex.show("grid2complex display")
+        grid2dcomplex.show("grid2complex back display")
         ####convert complex grid 2d to grid 2d
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
-        print("inside")
         backFFTarray = gridimage.as_numpy()
+        backFFTarray[backFFTarray<0] = 0
+        max_backFFTarray = np.max(backFFTarray)
         self.gs_backFFT = QtWidgets.QGraphicsScene()
-        self.gs_backFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backFFTarray/400)).scaled(self.gV_Backproj_FFT.size(),
-                                                                                        aspectRatioMode=QtCore.Qt.KeepAspectRatio,
-                                                                                        transformMode=QtCore.Qt.SmoothTransformation)))
+        self.gs_backFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(backFFTarray*255))))
         self.gV_Backproj_FFT.setScene(self.gs_PhantomFFT)
         self.gV_Backproj_FFT.setStyleSheet("background:black")
         self.gs_backFFT.update()
@@ -449,19 +472,3 @@ if __name__ == '__main__':
     wid_FanRecont.show()
     sys.exit(app.exec_())
 
-'''
-    def hslider_changed(self):
-        self.hSlider_Phantom_value = self.hSlider_Phantom.value()
-        self.rotation_triangle(self.hSlider_Phantom_value)
-
-    def rotation_triangle(self, val):
-        self.Line1.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
-        self.Line2.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
-        self.Line3.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2))
-        self.Ecllipse.setTransformOriginPoint(QtCore.QPointF(self.pix_Phantom.width() / 2, self.pix_Phantom.height()/2 ))
-        self.Line1.setRotation(val)
-        self.Line2.setRotation(val)
-        self.Line3.setRotation(val)
-        self.Ecllipse.setRotation(val)
-        fanbeam_main.forwardProj(self)
-'''
