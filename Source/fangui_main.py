@@ -397,9 +397,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getWidth(), grid2dcomplex.getHeight())
         self.fanFFTarray = gridimage.as_numpy()
+        fan_fft = self.fanFFTarray.copy()
+        fan_fft /= np.median(fan_fft) * 50
+        fan_fft *= 255;
         #low_values_indices = fanFFTarray < 0
         #fanFFTarray[low_values_indices] = 0
-        self.load_sino_fft_in_gv(self.fanFFTarray.astype(np.uint8))
+        self.load_sino_fft_in_gv(fan_fft.astype(np.uint8))
         ###Loading FFT of FAN
         #self.gs_fanFFT = QtWidgets.QGraphicsScene()
         #self.gs_fanFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint8(fanFFTarray/255)).scaled(self.gV_SinogramFFT.size(),
