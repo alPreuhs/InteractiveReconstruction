@@ -56,7 +56,7 @@ class Ui_ReconstructionGUI(object):
         self.hScrollBar_maxbeta.setPalette(palette)
         self.hScrollBar_maxbeta.setMinimum(1)
         self.hScrollBar_maxbeta.setMaximum(360)
-        self.hScrollBar_maxbeta.setProperty("value", 360)
+        self.hScrollBar_maxbeta.setProperty("value", 240)
         self.hScrollBar_maxbeta.setOrientation(QtCore.Qt.Horizontal)
         self.hScrollBar_maxbeta.setObjectName("hScrollBar_maxbeta")
         self.verticalLayout_6.addWidget(self.hScrollBar_maxbeta)
