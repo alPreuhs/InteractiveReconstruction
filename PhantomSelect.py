@@ -15,6 +15,11 @@ class Ui_Wid_PhantomSelect(object):
         Wid_PhantomSelect.setToolTipDuration(-1)
         self.gridLayout = QtWidgets.QGridLayout(Wid_PhantomSelect)
         self.gridLayout.setObjectName("gridLayout")
+        self.pushButton = QtWidgets.QPushButton(Wid_PhantomSelect)
+        self.pushButton.setObjectName("pushButton")
+        self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 1, 0, 1, 1)
         self.frame_SelectPhantom = QtWidgets.QFrame(Wid_PhantomSelect)
         self.frame_SelectPhantom.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_SelectPhantom.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -25,7 +30,7 @@ class Ui_Wid_PhantomSelect(object):
         self.ListWid_SelectPhantom.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.ListWid_SelectPhantom.setObjectName("ListWid_SelectPhantom")
         self.verticalLayout.addWidget(self.ListWid_SelectPhantom)
-        self.gridLayout.addWidget(self.frame_SelectPhantom, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.frame_SelectPhantom, 0, 0, 1, 2)
 
         self.retranslateUi(Wid_PhantomSelect)
         QtCore.QMetaObject.connectSlotsByName(Wid_PhantomSelect)
@@ -33,12 +38,13 @@ class Ui_Wid_PhantomSelect(object):
     def retranslateUi(self, Wid_PhantomSelect):
         _translate = QtCore.QCoreApplication.translate
         Wid_PhantomSelect.setWindowTitle(_translate("Wid_PhantomSelect", "Phantom Selection Window"))
+        self.pushButton.setText(_translate("Wid_PhantomSelect", "Schließen"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Wid_PhantomSelect = QtWidgets.QMainWindow()
+    Wid_PhantomSelect = QtWidgets.QWidget()
     ui = Ui_Wid_PhantomSelect()
     ui.setupUi(Wid_PhantomSelect)
     Wid_PhantomSelect.show()

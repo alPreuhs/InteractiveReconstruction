@@ -12,9 +12,9 @@ class selectPhantom(Ui_Wid_PhantomSelect):
         self.setupUi(widget)
         self.listwidload
 
-    #Loading the listwidget with images of phantom
 
     def listwidload(self):
+
         i = 1
         j = 1
         path = "Resources"

@@ -279,6 +279,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ##Capturing the image
     def on_live_image_clicked(self):
+        self.pB_videocapture.setDisabled(True)
+        self.pB_PhantomSelect.setDisabled(True)
         print('start thread')
         self.load_phantom_in_gv_from_string(r'resource_photos/laecheln.png')
         self.image_capture_thread.start()
@@ -288,6 +290,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         print('finished thread')
         self.phantom_grayscale = self.image_capture_thread.get_photo()
         self.on_load_phantom()
+        self.pB_videocapture.setDisabled(False)
+        self.pB_PhantomSelect.setDisabled(False)
 
 
     def on_load_phantom(self):
@@ -327,11 +331,22 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     # function for displaying the phantom selection window
     def on_select_phantom_clicked(self):
+        self.pB_videocapture.setDisabled(True)
+        self.pB_PhantomSelect.setDisabled(True)
         self.selectPhan_Window = QtWidgets.QWidget()
         self.selectPhan_creator = selectPhantom(self.selectPhan_Window)
         self.selectPhan_creator.ListWid_SelectPhantom.itemClicked.connect(self.getPhantom)
+        self.selectPhan_creator.pushButton.clicked.connect(self.phantom_window_closed)
         self.phantom_value =  self.selectPhan_creator.listwidload()
+
+        self.selectPhan_Window.setWindowFlags(QtCore.Qt.WindowTitleHint)
         self.selectPhan_Window.show()
+
+
+    def phantom_window_closed(self):
+        self.pB_videocapture.setDisabled(False)
+        self.pB_PhantomSelect.setDisabled(False)
+        self.selectPhan_Window.close()
 
     def getPhantom(self):
         self.file_path = self.selectPhan_creator.ListWid_SelectPhantom.currentIndex().data()
@@ -340,6 +355,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.selectPhan_Window.close()
         self.on_load_phantom()
         self.on_image_loaded()
+        self.pB_videocapture.setDisabled(False)
+        self.pB_PhantomSelect.setDisabled(False)
 
 
     ####Fourier transform of the phantom
@@ -366,6 +383,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ####forward projection
     def on_roentgen_clicked(self):
+        self.pB_Xray.setDisabled(True)
         print('i do roentgen')
         self.pB_Reconstruction.setDisabled(False)
         ####Forward Projection
@@ -431,6 +449,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
             elif not pw and not cf and not rl:
                 self.load_fan_in_view(self.fanogram)
 
+        self.pB_Xray.setDisabled(False)
         if(self.on_simulation):
             self.pB_Reconstruction.click()
 
@@ -620,6 +639,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ###Backprojection
     def on_reconstruction_clicked(self):
+        self.pB_Reconstruction.setDisabled(True)
         height = self.phantom_grayscale.shape[0]
         width = self.phantom_grayscale.shape[1]
         fan_beam_backprojector = self.pyconrad_instance.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(self.focalLength, self.deltaT, self.deltaBeta, width, height)
@@ -634,6 +654,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         to_display = self.scale_to_0_255(to_display)
         self.load_reco_in_gv(to_display.astype(np.uint8))
         self.backFFT(back)
+        self.pB_Reconstruction.setDisabled(False)
         if self.on_simulation:
             self.start_simulation()
 

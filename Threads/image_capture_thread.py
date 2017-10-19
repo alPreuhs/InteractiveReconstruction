@@ -33,7 +33,7 @@ class image_capture_thread(QtCore.QThread):
         return np.array(avgs)
 
     def run(self):
-        time.sleep(0.5)
+        time.sleep(2)
         self.cam.start()
         img = self.cam.get_image()
 
