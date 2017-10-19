@@ -1,11 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-__all__ = [QtCore, QtGui, QtWidgets]
-import sys
 from Source.PhantomSelect import Ui_Wid_PhantomSelect
-from Source.fanGUI_Project import Ui_ReconstructionGUI
-#from fangui_main import fanbeam_main
 import os,os.path
-import Resources
+
 
 
 class selectPhantom(Ui_Wid_PhantomSelect):
@@ -21,7 +17,7 @@ class selectPhantom(Ui_Wid_PhantomSelect):
     def listwidload(self):
         i = 1
         j = 1
-        path = "../Resources"
+        path = "Resources"
         files = []
         for dirpath, _, filenames in os.walk(path):
             for file in filenames:
@@ -30,9 +26,7 @@ class selectPhantom(Ui_Wid_PhantomSelect):
 
         Phantom_Path = {}
         for x in files:
-            print(x)
             Phantom_Path["Phantom"+str(i)]  = x
-            #print (Phantom_Path["Phantom"+str(i)])
             i=i+1
 
 
@@ -40,8 +34,6 @@ class selectPhantom(Ui_Wid_PhantomSelect):
             item = QtWidgets.QListWidgetItem()
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap(x), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            #Name = "Phantom"+str(i)
-            #i=i+1
             item.setIcon(icon)
             item.setText("Phantom"+str(j))
             j+=1

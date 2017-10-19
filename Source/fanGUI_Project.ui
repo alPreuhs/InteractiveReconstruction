@@ -127,6 +127,9 @@
             <property name="maximum">
              <number>360</number>
             </property>
+            <property name="value">
+             <number>360</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -217,6 +220,9 @@
             <property name="maximum">
              <number>1024</number>
             </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -283,14 +289,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QGraphicsView" name="gV_Phantom">
+           <widget class="CustomView" name="gV_Phantom">
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="gV_Phantom_FFT"/>
+           <widget class="CustomView" name="gV_Phantom_FFT"/>
           </item>
          </layout>
         </widget>
@@ -305,14 +311,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QGraphicsView" name="gV_Sinogram">
+           <widget class="CustomView" name="gV_Sinogram">
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="gV_SinogramFFT"/>
+           <widget class="CustomView" name="gV_SinogramFFT"/>
           </item>
          </layout>
         </widget>
@@ -363,14 +369,14 @@ N</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QGraphicsView" name="gV_Backproj">
+           <widget class="CustomView" name="gV_Backproj">
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="gV_Backproj_FFT">
+           <widget class="CustomView" name="gV_Backproj_FFT">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -380,9 +386,6 @@ N</string>
            </widget>
           </item>
          </layout>
-         <zorder>gV_Backproj</zorder>
-         <zorder>gV_Backproj_FFT</zorder>
-         <zorder>gV_Backproj</zorder>
          <zorder>gV_Backproj_FFT</zorder>
          <zorder>gV_Backproj</zorder>
         </widget>
@@ -532,6 +535,13 @@ M</string>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomView</class>
+   <extends>QGraphicsView</extends>
+   <header location="global">customView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -8,12 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class PhotoViewer(QtWidgets.QGraphicsView):
-    photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
-    def mouseDoubleClickEvent(self, event):
-        self.photoClicked.emit(QtCore.QPoint(event.pos()))
-        super(PhotoViewer, self).mousePressEvent(event)
-
 class Ui_ReconstructionGUI(object):
     def setupUi(self, ReconstructionGUI):
         ReconstructionGUI.setObjectName("ReconstructionGUI")
@@ -62,6 +56,7 @@ class Ui_ReconstructionGUI(object):
         self.hScrollBar_maxbeta.setPalette(palette)
         self.hScrollBar_maxbeta.setMinimum(1)
         self.hScrollBar_maxbeta.setMaximum(360)
+        self.hScrollBar_maxbeta.setProperty("value", 360)
         self.hScrollBar_maxbeta.setOrientation(QtCore.Qt.Horizontal)
         self.hScrollBar_maxbeta.setObjectName("hScrollBar_maxbeta")
         self.verticalLayout_6.addWidget(self.hScrollBar_maxbeta)
@@ -97,6 +92,7 @@ class Ui_ReconstructionGUI(object):
         self.hScrollBar_deltabeta.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.hScrollBar_deltabeta.setMinimum(1)
         self.hScrollBar_deltabeta.setMaximum(1024)
+        self.hScrollBar_deltabeta.setProperty("value", 1024)
         self.hScrollBar_deltabeta.setOrientation(QtCore.Qt.Horizontal)
         self.hScrollBar_deltabeta.setObjectName("hScrollBar_deltabeta")
         self.verticalLayout_5.addWidget(self.hScrollBar_deltabeta)
@@ -132,11 +128,11 @@ class Ui_ReconstructionGUI(object):
         self.frame_5.setObjectName("frame_5")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.frame_5)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.gV_Phantom = PhotoViewer(self.frame_5)
+        self.gV_Phantom = CustomView(self.frame_5)
         self.gV_Phantom.setAutoFillBackground(False)
         self.gV_Phantom.setObjectName("gV_Phantom")
         self.verticalLayout_3.addWidget(self.gV_Phantom)
-        self.gV_Phantom_FFT = PhotoViewer(self.frame_5)
+        self.gV_Phantom_FFT = CustomView(self.frame_5)
         self.gV_Phantom_FFT.setObjectName("gV_Phantom_FFT")
         self.verticalLayout_3.addWidget(self.gV_Phantom_FFT)
         self.gridLayout_2.addWidget(self.frame_5, 0, 1, 1, 1)
@@ -146,11 +142,11 @@ class Ui_ReconstructionGUI(object):
         self.frame_2.setObjectName("frame_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.frame_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.gV_Sinogram = PhotoViewer(self.frame_2)
+        self.gV_Sinogram = CustomView(self.frame_2)
         self.gV_Sinogram.setAutoFillBackground(False)
         self.gV_Sinogram.setObjectName("gV_Sinogram")
         self.verticalLayout_2.addWidget(self.gV_Sinogram)
-        self.gV_SinogramFFT = PhotoViewer(self.frame_2)
+        self.gV_SinogramFFT = CustomView(self.frame_2)
         self.gV_SinogramFFT.setObjectName("gV_SinogramFFT")
         self.verticalLayout_2.addWidget(self.gV_SinogramFFT)
         self.gridLayout_2.addWidget(self.frame_2, 0, 3, 1, 1)
@@ -174,18 +170,15 @@ class Ui_ReconstructionGUI(object):
         self.frame.setObjectName("frame")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.frame)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.gV_Backproj = PhotoViewer(self.frame)
+        self.gV_Backproj = CustomView(self.frame)
         self.gV_Backproj.setAutoFillBackground(False)
         self.gV_Backproj.setObjectName("gV_Backproj")
         self.verticalLayout.addWidget(self.gV_Backproj)
-        self.gV_Backproj_FFT = PhotoViewer(self.frame)
+        self.gV_Backproj_FFT = CustomView(self.frame)
         self.gV_Backproj_FFT.setFocusPolicy(QtCore.Qt.NoFocus)
         self.gV_Backproj_FFT.setAutoFillBackground(False)
         self.gV_Backproj_FFT.setObjectName("gV_Backproj_FFT")
         self.verticalLayout.addWidget(self.gV_Backproj_FFT)
-        self.gV_Backproj.raise_()
-        self.gV_Backproj_FFT.raise_()
-        self.gV_Backproj.raise_()
         self.gV_Backproj_FFT.raise_()
         self.gV_Backproj.raise_()
         self.gridLayout_2.addWidget(self.frame, 0, 5, 1, 1)
@@ -289,6 +282,7 @@ class Ui_ReconstructionGUI(object):
 "O\n"
 "M"))
 
+from Source.customView import CustomView
 
 if __name__ == "__main__":
     import sys
