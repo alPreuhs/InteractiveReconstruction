@@ -11,18 +11,19 @@ import qimage2ndarray
 import sys
 import pygame
 import pygame.camera
+import time
 
-
-jvm = PyConrad()
-jvm.setup()
-jvm.add_import('edu.stanford.rsl.conrad.data.numeric')
-jvm.add_import('edu.stanford.rsl.tutorial.phantoms')
-jvm.add_import('edu.stanford.rsl.conrad.phantom')
+#jvm = PyConrad()
+#jvm.setup()
+#jvm.add_import('edu.stanford.rsl.conrad.data.numeric')
+#jvm.add_import('edu.stanford.rsl.tutorial.phantoms')
+#jvm.add_import('edu.stanford.rsl.conrad.phantom')
 
 #Pyconrad
-pyconrad = PyConrad()
-pyconrad.setup()
-pyconrad.start_conrad()
+pyconrad_instance = PyConrad()
+pyconrad_instance.add_import('edu.stanford.rsl.conrad.data.numeric')
+pyconrad_instance.setup()
+pyconrad_instance.start_conrad()
 
 
 class fanbeam_main(Ui_ReconstructionGUI):
@@ -63,6 +64,30 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.set_max_beta_text()
 
         self.gV_Phantom
+        self.pushButton.clicked.connect(self.on_init_simulation)
+
+
+    def on_init_simulation(self):
+        self.on_simulation = True
+        self.current = 1
+        self.end = 360
+        self.dt = 5
+
+        self.current -= self.dt
+        self.start_simulation()
+
+
+
+    def start_simulation(self):
+       # time.sleep(5)
+        print('at step {}'.format(self.current))
+        self.current += self.dt
+
+        if self.current < self.end:
+            self.maxBeta = math.radians(self.current)
+            self.deltaBeta = self.maxBeta / self.numProj
+            self.pB_Xray.click()
+           # self.on_roentgen_clicked()
 
 
 
@@ -79,27 +104,27 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def on_open_phantom(self,point):
         if self.phantom_loaded:
-            jvm['Grid2D'].from_numpy(self.phantom_grayscale).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.phantom_grayscale).show();
 
     def on_open_phantom_fft(self, point):
         if self.phantom_fft_loaded:
-            jvm['Grid2D'].from_numpy(self.phantom_fft).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.phantom_fft).show();
 
     def on_open_sinogram(self, point):
         if self.sinogram_loaded:
-            jvm['Grid2D'].from_numpy(self.fanogramarray).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.fanogramarray).show();
 
     def on_open_sinogram_fft(self, point):
         if self.sino_fft_loaded:
-            jvm['Grid2D'].from_numpy(self.fanFFTarray).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.fanFFTarray).show();
 
     def on_open_back(self, point):
         if self.back_loaded:
-            jvm['Grid2D'].from_numpy(self.backarray).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.backarray).show();
 
     def on_open_back_fft(self, point):
         if self.back_fft_loaded:
-            jvm['Grid2D'].from_numpy(self.backFFTarray).show();
+            pyconrad_instance['Grid2D'].from_numpy(self.backFFTarray).show();
 
 
     def disable_sliders_on_start(self):
@@ -148,6 +173,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.deltaBeta = (float)(self.maxBeta / self.numProj)
 
     def set_parameters(self):
+        self.on_simulation = False
         self.phantom_loaded = False
         self.phantom_fft_loaded = False
         self.sinogram_loaded = False
@@ -158,8 +184,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def connect_threads(self):
         from Threads.forward_projection_thread import forward_project_thread as fpt
-        self.fan_projector_thread = fpt()
-        self.fan_projector_thread.forward_project_finsihed.connect(self.on_fw_projection_finished)
+        #self.fan_projector_thread = fpt()
+        #self.fan_projector_thread.forward_project_finsihed.connect(self.on_fw_projection_finished)
 
         from Threads.back_projection_thread import back_project_thread as bpt
         self.backprojector_thread = bpt()
@@ -176,6 +202,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.gV_Phantom_FFT.fitInView(self.gpi_phantom_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.sinogram_loaded:
             self.gV_Sinogram.fitInView(self.gpi_sino.boundingRect(), QtCore.Qt.KeepAspectRatio)
+            self.gV_Sinogram.update()
+            self.gV_Sinogram.parentWidget().update()
+            self.gV_Phantom.scene().update()
+
+            print('now i should be displayed')
         if self.sino_fft_loaded:
             self.gV_SinogramFFT.fitInView(self.gpi_sino_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.back_loaded:
@@ -218,8 +249,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def generate_fft_of_phantom(self):
         ###need self.phantom_fft as we might open it somewhen with imageJ
-        self.phantom_grid = jvm['Grid2D'].from_numpy(self.phantom_grayscale)
-        phantom_fft = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.phantom_grid)
+        self.phantom_grid = pyconrad_instance['Grid2D'].from_numpy(self.phantom_grayscale)
+        phantom_fft = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.phantom_grid)
         phantom_fft.transformForward()
         phantom_fft.fftshift()
         phantom_fft_magnitude = phantom_fft.getMagnSubGrid(0, 0, phantom_fft.getWidth(), phantom_fft.getHeight())
@@ -258,8 +289,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ####Fourier transform of the phantom
     def PhantomFFT(self):
-        self.PhantomFFT_image = jvm['Grid2D'].from_numpy(np.array(self.image))
-        grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.PhantomFFT_image)
+        self.PhantomFFT_image = pyconrad_instance['Grid2D'].from_numpy(np.array(self.image))
+        grid2dcomplex = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.PhantomFFT_image)
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
         ####convert complex grid 2d to grid 2d
@@ -280,19 +311,29 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     ####forward projection
     def on_roentgen_clicked(self):
+        print('i do roentgen')
         self.pB_Reconstruction.setDisabled(False)
         ####Forward Projection
-        ForwardProj = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
+        ForwardProj = pyconrad_instance.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
+        print('got a problem here')
+#        self.fan_projector_thread.initttt(self.use_cl, ForwardProj, self.phantom_grid)
+        from Threads.forward_projection_thread import forward_project_thread as fpt
 
-        self.fan_projector_thread.init(self.use_cl, ForwardProj, self.phantom_grid)
-        self.fan_projector_thread.run()
+        self.use_cl = False
+        self.a = fpt(self.use_cl, self.phantom_grid, self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
+        self.a.forward_project_finsihed.connect(self.on_fw_projection_finished)
+        self.a.start()
+
+        print('no....not there')
+      #  self.fan_projector_thread.start()
 
 
 
 
     def on_fw_projection_finished(self):
-
-        self.fanogram = self.fan_projector_thread.get_fanogram()
+        print('made it inhere')
+        #self.fanogram = self.fan_projector_thread.get_fanogram()
+        self.fanogram = self.a.get_fanogram()
         self.load_fan_in_view(self.fanogram)
         self.fanFFT()
 
@@ -313,28 +354,30 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.cosine_parker()
         print('finished calcing weights')
         self.select_filtered_image()
+        if(self.on_simulation):
+            self.pB_Reconstruction.click()
 
 
 
     def cosine_parker(self):
-        self.fanogram_cosine_parker = pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
+        self.fanogram_cosine_parker = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
         self.fanogram_cosine_filtered, self.parker_weight)
 
     def ramlak_parker(self):
-        self.fanogram_ramlak_parker = pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
+        self.fanogram_ramlak_parker = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
             self.fanogram_ramlak, self.parker_weight)
 
 
     def ramlak_cosine_parker(self):
-        self.fanogram_full_filtered = pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
+        self.fanogram_full_filtered = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
             self.fanogram_ramlak_cosine, self.parker_weight)
 
 
     def ramlak_cosine(self):
         sizeimage = self.fanogram.getSize()[1]
-        cosine = pyconrad.classes.stanford.rsl.tutorial.fan.CosineFilter(self.focalLength, self.maxT, self.deltaT)
-        ramlak = pyconrad.classes.stanford.rsl.tutorial.filters.RamLakKernel((int)(self.maxT / self.deltaT),
-                                                                             self.deltaT)
+        cosine = pyconrad_instance.classes.stanford.rsl.tutorial.fan.CosineFilter(self.focalLength, self.maxT, self.deltaT)
+        ramlak = pyconrad_instance.classes.stanford.rsl.tutorial.filters.RamLakKernel((int)(self.maxT / self.deltaT),
+                                                                                      self.deltaT)
         self.fanogram_ramlak_cosine = self.fanogram.clone()
         for theta in range(0, sizeimage):
             ramlak.applyToGrid(self.fanogram_ramlak_cosine.getSubGrid(theta))
@@ -362,7 +405,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
     def fanFFT(self):
-        grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.fanogram)
+        grid2dcomplex = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.fanogram)
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
         ####convert complex grid 2d to grid 2d
@@ -394,8 +437,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
     def parkerweight(self):
-        self.parker_weight = pyconrad.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(self.focalLength, self.maxT, self.deltaT, self.maxBeta,self.deltaBeta)
-        self.fanogram_parker = pyconrad.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(self.fanogram, self.parker_weight)
+        self.parker_weight = pyconrad_instance.classes.stanford.rsl.tutorial.fan.redundancy.ParkerWeights(self.focalLength, self.maxT, self.deltaT, self.maxBeta, self.deltaBeta)
+        self.fanogram_parker = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(self.fanogram, self.parker_weight)
 
 
     def parker_weight_check(self):
@@ -452,7 +495,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def ramlakfilter(self):
         sizeimage = self.fanogram.getSize()[1]
-        ramlak = pyconrad.classes.stanford.rsl.tutorial.filters.RamLakKernel((int)(self.maxT / self.deltaT), self.deltaT)
+        ramlak = pyconrad_instance.classes.stanford.rsl.tutorial.filters.RamLakKernel((int)(self.maxT / self.deltaT), self.deltaT)
         self.fanogram_ramlak = self.fanogram.clone()
         for theta in range(0, sizeimage):
             ramlak.applyToGrid(self.fanogram_ramlak.getSubGrid(theta))
@@ -463,7 +506,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def cosinefilter(self):
         sizeimage = self.fanogram.getSize()[1]
-        cosine = pyconrad.classes.stanford.rsl.tutorial.fan.CosineFilter(self.focalLength, self.maxT, self.deltaT)
+        cosine = pyconrad_instance.classes.stanford.rsl.tutorial.fan.CosineFilter(self.focalLength, self.maxT, self.deltaT)
         self.fanogram_cosine_filtered = self.fanogram.clone()
         for theta in range(0, sizeimage):
             cosine.applyToGrid(self.fanogram_cosine_filtered.getSubGrid(theta))
@@ -495,9 +538,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def on_reconstruction_clicked(self):
         height = self.phantom_grayscale.shape[0]
         width = self.phantom_grayscale.shape[1]
-        fan_beam_backprojector = pyconrad.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(self.focalLength, self.deltaT, self.deltaBeta, width, height)
+        fan_beam_backprojector = pyconrad_instance.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(self.focalLength, self.deltaT, self.deltaBeta, width, height)
         self.backprojector_thread.init(self.use_cl, fan_beam_backprojector, self.current_fanogram)
-        self.backprojector_thread.run()
+        print('going to project stuff')
+        self.backprojector_thread.start()
 
 
     def on_bw_projection_finished(self):
@@ -507,10 +551,13 @@ class fanbeam_main(Ui_ReconstructionGUI):
         to_display = self.scale_to_0_255(to_display)
         self.load_reco_in_gv(to_display.astype(np.uint8))
         self.backFFT(back)
+        if self.on_simulation:
+            self.start_simulation()
+        print('this is b')
 
     ####Fourier transform of the phantom
     def backFFT(self, back):
-        grid2dcomplex = pyconrad.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(back)
+        grid2dcomplex = pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(back)
         grid2dcomplex.transformForward()
         grid2dcomplex.fftshift()
         ####convert complex grid 2d to grid 2d
@@ -518,6 +565,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.backFFTarray = gridimage.as_numpy()
         back_fft= self.fft_scaling(self.backFFTarray.copy())
         self.load_reco_fft_in_gv(back_fft.astype(np.uint8))
+        print('this shoudl be a and com before b')
 
 
     def load_phantom_in_gv(self, image):

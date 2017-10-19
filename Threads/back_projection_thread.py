@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 import subprocess
-
+import time
 class back_project_thread(QtCore.QThread):
 
     back_project_finsihed  = QtCore.pyqtSignal(str)
@@ -14,6 +14,7 @@ class back_project_thread(QtCore.QThread):
         return self.back
 
     def run(self):
+        time.sleep(10)
         if self.use_cl:
             self.back = self.Backprojection.backprojectPixelDrivenCL(self.fanogram)
         else:

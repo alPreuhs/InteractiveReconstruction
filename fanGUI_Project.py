@@ -115,6 +115,9 @@ class Ui_ReconstructionGUI(object):
         self.checkBox_cosine.setFont(font)
         self.checkBox_cosine.setObjectName("checkBox_cosine")
         self.horizontalLayout_3.addWidget(self.checkBox_cosine)
+        self.pushButton = QtWidgets.QPushButton(self.groupBox)
+        self.pushButton.setObjectName("pushButton")
+        self.horizontalLayout_3.addWidget(self.pushButton)
         self.verticalLayout_7.addWidget(self.groupBox)
         self.frame_7 = QtWidgets.QFrame(self.Reconstruction)
         self.frame_7.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -243,6 +246,7 @@ class Ui_ReconstructionGUI(object):
         self.checkBox_RamLakFilter.setText(_translate("ReconstructionGUI", "RamLak Filter"))
         self.checkBox_ParkerWeigh.setText(_translate("ReconstructionGUI", "Parker Gewicht"))
         self.checkBox_cosine.setText(_translate("ReconstructionGUI", "Kosinus Filter"))
+        self.pushButton.setText(_translate("ReconstructionGUI", "PushButton"))
         self.pB_Xray.setText(_translate("ReconstructionGUI", "R\n"
 "Ö\n"
 "N\n"
