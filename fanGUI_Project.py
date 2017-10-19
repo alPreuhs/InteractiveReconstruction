@@ -282,7 +282,7 @@ class Ui_ReconstructionGUI(object):
 "O\n"
 "M"))
 
-from Source.customView import CustomView
+from customView import CustomView
 
 if __name__ == "__main__":
     import sys

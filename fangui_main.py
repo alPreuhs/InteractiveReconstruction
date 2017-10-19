@@ -157,12 +157,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
     def connect_threads(self):
-        from Source.Threads.forward_projection_thread import forward_project_thread as fpt
+        from Threads.forward_projection_thread import forward_project_thread as fpt
         self.fan_projector_thread = fpt()
         #self.forward.finished.connect(self.on_fw_projection_finished)
         self.fan_projector_thread.forward_project_finsihed.connect(self.on_fw_projection_finished)
 
-        from Source.Threads.back_projection_thread import back_project_thread as bpt
+        from Threads.back_projection_thread import back_project_thread as bpt
         self.backprojector_thread = bpt()
         self.backprojector_thread.back_project_finsihed.connect(self.on_bw_projection_finished)
 

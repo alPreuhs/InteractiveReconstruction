@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Source.PhantomSelect import Ui_Wid_PhantomSelect
+from PhantomSelect import Ui_Wid_PhantomSelect
 import os,os.path
 
 
