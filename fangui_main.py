@@ -1,17 +1,11 @@
-from PIL import ImageOps, Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter
 from PyQt5 import QtCore, QtGui, QtWidgets
 from fanGUI_Project import Ui_ReconstructionGUI
 from PhantomSelect_Window import selectPhantom
 from pyconrad import *
-from skimage.io import imread, imsave
-from skimage.color import rgb2gray
 import math
 import numpy as np
-import qimage2ndarray
 import sys
-import pygame
-import pygame.camera
-import time
 
 
 
@@ -26,7 +20,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def __init__(self, MainWindow):
         self.MainWindow = MainWindow
         self.start_pyconrad()
-        #        self.MainWindow.connect(self.MainWindow, QtCore.PYQT_SIGNAL('resizeEvent()',self.test))
+
         ##somehow tracback is disabled by default,
         ##the following reactivats it
         def excepthook(type_, value, traceback_):
@@ -94,9 +88,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.hScrollBar_maxbeta.setValue(self.end)
             self.on_simulation = False
             self.pB_Xray.click()
-
-
-
     
 
 
@@ -171,14 +162,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
 
-
-
-
-
-
-
-
-
     def disable_sliders_on_start(self):
         self.pB_Xray.setDisabled(True)
         self.hScrollBar_deltabeta.setDisabled(True)
@@ -194,7 +177,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def connect_slider(self):
         ## delta beta slider
         self.hScrollBar_deltabeta.valueChanged.connect(self.deltabetaValue)
-        self.hScrollBar_deltabeta.valueChanged.connect(self.deltabetatext)
         ## max beta slider
         self.hScrollBar_maxbeta.valueChanged.connect(self.on_max_beta_value_changed)
         self.hScrollBar_maxbeta.valueChanged.connect(self.set_max_beta_text)
@@ -256,24 +238,12 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.gV_Phantom_FFT.fitInView(self.gpi_phantom_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.sinogram_loaded:
             self.gV_Sinogram.fitInView(self.gpi_sino.boundingRect(), QtCore.Qt.KeepAspectRatio)
-            #self.gV_Sinogram.update()
-            #self.gV_Sinogram.parentWidget().update()
-            #self.gV_Phantom.scene().update()
-
-
         if self.sino_fft_loaded:
             self.gV_SinogramFFT.fitInView(self.gpi_sino_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.back_loaded:
             self.gV_Backproj.fitInView(self.gpi_back.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.back_fft_loaded:
             self.gV_Backproj_FFT.fitInView(self.gpi_back_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
-
-
-
-    def convert_pygame_to_grayscale(self, img):
-        arr = pygame.surfarray.array3d(img)
-        avgs = [[(r * 0.298 + g * 0.587 + b * 0.114) for (r, g, b) in col] for col in arr]
-        return np.array(avgs)
 
 
 
@@ -338,7 +308,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.selectPhan_creator.ListWid_SelectPhantom.itemClicked.connect(self.getPhantom)
         self.selectPhan_creator.pushButton.clicked.connect(self.phantom_window_closed)
         self.phantom_value =  self.selectPhan_creator.listwidload()
-
         self.selectPhan_Window.setWindowFlags(QtCore.Qt.WindowTitleHint)
         self.selectPhan_Window.show()
 
@@ -351,33 +320,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def getPhantom(self):
         self.file_path = self.selectPhan_creator.ListWid_SelectPhantom.currentIndex().data()
         self.phantom_grayscale = np.array(Image.open(self.phantom_value[self.file_path]))
-        #self.PhantomFFT()
         self.selectPhan_Window.close()
         self.on_load_phantom()
         self.on_image_loaded()
         self.pB_videocapture.setDisabled(False)
         self.pB_PhantomSelect.setDisabled(False)
-
-
-    ####Fourier transform of the phantom
-    def PhantomFFT(self):
-        self.PhantomFFT_image = self.pyconrad_instance['Grid2D'].from_numpy(np.array(self.image))
-        grid2dcomplex = self.pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.Grid2DComplex(self.PhantomFFT_image)
-        grid2dcomplex.transformForward()
-        grid2dcomplex.fftshift()
-        ####convert complex grid 2d to grid 2d
-        gridimage = grid2dcomplex.getMagnSubGrid(0, 0, grid2dcomplex.getHeight(), grid2dcomplex.getWidth())
-
-        PhantomFFTarray = gridimage.as_numpy()
-        PhantomFFTarray =self.fft_scaling(PhantomFFTarray)
-
-        self.gs_PhantomFFT = QtWidgets.QGraphicsScene()
-        self.gs_PhantomFFT.addPixmap(QtGui.QPixmap.fromImage(qimage2ndarray.array2qimage(np.uint16(PhantomFFTarray/255)).scaled(self.gV_Phantom_FFT.size(),aspectRatioMode=QtCore.Qt.KeepAspectRatio,transformMode=QtCore.Qt.FastTransformation)))
-
-        self.gV_Phantom_FFT.setScene(self.gs_PhantomFFT)
-        self.gV_Phantom_FFT.fitInView(self.gs_PhantomFFT.sceneRect())
-        self.gV_Phantom_FFT.setStyleSheet("background:black")
-        self.gs_PhantomFFT.update()
 
 
 
@@ -620,11 +567,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ##goes from 1 to 1024
         self.numProj =self.hScrollBar_deltabeta.value()
         self.deltaBeta = self.maxBeta / self.numProj
-
-
-    def deltabetatext(self):
-        ###currently not used....might be deleted soon
-        a = 10
 
 
     def on_max_beta_value_changed(self):
