@@ -186,7 +186,7 @@ class Ui_ReconstructionGUI(object):
         self.gV_Backproj.setObjectName("gV_Backproj")
         self.verticalLayout.addWidget(self.gV_Backproj)
         self.gV_Backproj_FFT = CustomView(self.frame)
-        self.gV_Backproj_FFT.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.gV_Backproj_FFT.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.gV_Backproj_FFT.setAutoFillBackground(False)
         self.gV_Backproj_FFT.setObjectName("gV_Backproj_FFT")
         self.verticalLayout.addWidget(self.gV_Backproj_FFT)

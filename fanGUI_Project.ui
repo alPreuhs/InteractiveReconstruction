@@ -401,7 +401,7 @@ N</string>
           <item>
            <widget class="CustomView" name="gV_Backproj_FFT">
             <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
+             <enum>Qt::StrongFocus</enum>
             </property>
             <property name="autoFillBackground">
              <bool>false</bool>
