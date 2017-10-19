@@ -22,5 +22,6 @@ class forward_project_thread(QtCore.QThread):
             self.fanogram = self.ForwardProj.projectRayDrivenCL(self.Phantom)
         else:
             self.fanogram = self.ForwardProj.projectRayDriven(self.Phantom)
-        time.sleep(5)
+       # time.sleep(5)
+        jpype.detachThreadFromJVM()
         self.forward_project_finsihed.emit('finished')

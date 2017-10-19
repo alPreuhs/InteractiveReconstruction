@@ -19,9 +19,10 @@ class back_project_thread(QtCore.QThread):
 
     def run(self):
         jpype.attachThreadToJVM()
-        time.sleep(5)
+      #  time.sleep(5)
         if self.use_cl:
             self.back = self.Backprojection.backprojectPixelDrivenCL(self.fanogram)
         else:
             self.back = self.Backprojection.backprojectPixelDriven(self.fanogram)
+        jpype.detachThreadFromJVM()
         self.back_project_finsihed.emit('finished')

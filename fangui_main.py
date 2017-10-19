@@ -53,8 +53,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.set_max_beta_text()
 
         self.gV_Phantom
-        self.pushButton.clicked.connect(self.on_init_simulation)
-
+        self.bt_start_simulation.clicked.connect(self.on_init_simulation)
+        self.bt_stop_simulation.clicked.connect(self.on_stop_simulation)
 
     def start_pyconrad(self):
         self.pyconrad_instance = PyConrad()
@@ -62,7 +62,17 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.pyconrad_instance.setup()
         self.pyconrad_instance.start_conrad()
 
+
+
+    def on_stop_simulation(self):
+        self.on_simulation = False
+        self.bt_stop_simulation.setDisabled(True)
+        self.bt_start_simulation.setDisabled(False)
+
+
     def on_init_simulation(self):
+        self.bt_start_simulation.setDisabled(True)
+        self.bt_stop_simulation.setDisabled(False)
         self.on_simulation = True
         self.current = 1
         self.end = 360
@@ -75,14 +85,15 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def start_simulation(self):
        # time.sleep(5)
-        print('at step {}'.format(self.current))
         self.current += self.dt
 
-        if self.current < self.end:
-            self.maxBeta = math.radians(self.current)
-            self.deltaBeta = self.maxBeta / self.numProj
+        if self.current <= self.end:
+            self.hScrollBar_maxbeta.setValue(self.current)
             self.pB_Xray.click()
-           # self.on_roentgen_clicked()
+        else:
+            self.hScrollBar_maxbeta.setValue(self.end)
+            self.on_simulation = False
+            self.pB_Xray.click()
 
 
 
@@ -97,29 +108,75 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Backproj.photoClicked.connect(self.on_open_back)
         self.gV_Backproj_FFT.photoClicked.connect(self.on_open_back_fft)
 
+        self.gV_Backproj_FFT.photoSaved.connect(self.on_save_back_fft2)
+        self.gV_Phantom.photoSaved.connect(self.on_save_phantom)
+        self.gV_Phantom_FFT.photoSaved.connect(self.on_save_phantom_fft)
+        self.gV_Sinogram.photoSaved.connect(self.on_save_sinogram)
+        self.gV_SinogramFFT.photoSaved.connect(self.on_save_sinogram_fft)
+        self.gV_Backproj.photoSaved.connect(self.on_save_back)
+
+
+
+
+
+
     def on_open_phantom(self,point):
         if self.phantom_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_grayscale).show();
-
+            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_grayscale).show("Phantom");
     def on_open_phantom_fft(self, point):
         if self.phantom_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_fft).show();
-
+            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_fft).show("FFT des Phantoms");
     def on_open_sinogram(self, point):
         if self.sinogram_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.fanogramarray).show();
+            self.pyconrad_instance['Grid2D'].from_numpy(self.fanogramarray).show("Fanogram");
 
     def on_open_sinogram_fft(self, point):
         if self.sino_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.fanFFTarray).show();
-
+            self.pyconrad_instance['Grid2D'].from_numpy(self.fanFFTarray).show("FFT des Fanograms");
     def on_open_back(self, point):
         if self.back_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.backarray).show();
-
+            self.pyconrad_instance['Grid2D'].from_numpy(self.backarray).show("Rekonstruktion");
     def on_open_back_fft(self, point):
         if self.back_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.backFFTarray).show();
+            self.pyconrad_instance['Grid2D'].from_numpy(self.backFFTarray).show("FFT der Rekonstruktion");
+
+
+
+
+    def on_save_phantom(self):
+        if self.phantom_loaded:
+            Image.fromarray(self.scaled_phantom.astype(np.uint8)).save(r'photos/Phantom.png')
+
+    def on_save_phantom_fft(self):
+        if self.phantom_fft_loaded:
+            Image.fromarray(self.scaled_phantom_fft).save(r'photos/Phantom_FFT.png')
+
+    def on_save_sinogram(self):
+        if self.sinogram_loaded:
+            Image.fromarray(self.scaled_sinogram).save(r'photos/Fanogram.png')
+
+    def on_save_sinogram_fft(self):
+        if self.sino_fft_loaded:
+            Image.fromarray(self.scaled_sinogram_fft).save(r'photos/Fanogram_FFT.png')
+
+    def on_save_back(self):
+        if self.back_loaded:
+            Image.fromarray(self.scaled_reco).save(r'photos/Rekonstruktion.png')
+
+    def on_save_back_fft2(self):
+        print('try do reco fft')
+        if self.back_fft_loaded:
+            Image.fromarray(self.scaled_reco_fft).save(r'photos/Rekonstruktion_FFT.png')
+
+
+
+
+
+
+
+
+
+
 
 
     def disable_sliders_on_start(self):
@@ -131,6 +188,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ###t missing....
         self.checkBox_ParkerWeigh.setDisabled(True)
         self.pB_Reconstruction.setDisabled(True)
+        self.bt_stop_simulation.setDisabled(True)
+        self.bt_start_simulation.setDisabled(True)
 
     def connect_slider(self):
         ## delta beta slider
@@ -197,11 +256,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.gV_Phantom_FFT.fitInView(self.gpi_phantom_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.sinogram_loaded:
             self.gV_Sinogram.fitInView(self.gpi_sino.boundingRect(), QtCore.Qt.KeepAspectRatio)
-            self.gV_Sinogram.update()
-            self.gV_Sinogram.parentWidget().update()
-            self.gV_Phantom.scene().update()
+            #self.gV_Sinogram.update()
+            #self.gV_Sinogram.parentWidget().update()
+            #self.gV_Phantom.scene().update()
 
-            print('now i should be displayed')
+
         if self.sino_fft_loaded:
             self.gV_SinogramFFT.fitInView(self.gpi_sino_fft.boundingRect(), QtCore.Qt.KeepAspectRatio)
         if self.back_loaded:
@@ -221,7 +280,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
     ##Capturing the image
     def on_live_image_clicked(self):
         print('start thread')
-        self.load_phantom_in_gv_from_string(r'photos/laecheln.png')
+        self.load_phantom_in_gv_from_string(r'resource_photos/laecheln.png')
         self.image_capture_thread.start()
 
 
@@ -232,9 +291,9 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
     def on_load_phantom(self):
-        self.checkBox_cosine.setChecked(False)
-        self.checkBox_ParkerWeigh.setChecked(False)
-        self.checkBox_RamLakFilter.setChecked(False)
+        #self.checkBox_cosine.setChecked(False)
+        #self.checkBox_ParkerWeigh.setChecked(False)
+        #self.checkBox_RamLakFilter.setChecked(False)
 
         self.on_image_loaded()
         gray_t = self.phantom_grayscale.astype(np.int8)
@@ -263,6 +322,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ###t missing....
         self.checkBox_ParkerWeigh.setDisabled(False)
         self.pB_Reconstruction.setDisabled(True)
+        self.bt_start_simulation.setDisabled(False)
 
 
     # function for displaying the phantom selection window
@@ -310,43 +370,67 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.pB_Reconstruction.setDisabled(False)
         ####Forward Projection
         ForwardProj = self.pyconrad_instance.classes.stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
-        print('got a problem here')
         self.fan_projector_thread.init(self.use_cl, ForwardProj, self.phantom_grid)
         self.fan_projector_thread.start()
-       # self.a = fpt(self.pyconrad_instance, self.use_cl, self.phantom_grid.as_numpy(), self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
-       # self.a.forward_project_finsihed.connect(self.on_fw_projection_finished)
-        #self.a.start()
-#aaaaaaaaaaaaaaaaaaaaa
-        print('no....not there')
-      #  self.fan_projector_thread.start()
 
 
 
 
     def on_fw_projection_finished(self):
-        print('made it inhere')
         self.fanogram = self.fan_projector_thread.get_fanogram()
       #  self.fanogram = self.a.get_fanogram()
         self.load_fan_in_view(self.fanogram)
         self.fanFFT()
+        ###if we are not in simulation mode, we want to
+        ###display any combination fast, therefore we
+        ###precompute it
+        ##########################
+        ###in demo mode, we only compute the needed
+        ###filtering
+        if not self.on_simulation:
+            ## creates a self.fanogram_parker
+            self.parkerweight()
+            ## creates a self.fanogram_cosine_filtered
+            self.cosinefilter()
+            ## creates  self.fanogram_ramlak
+            self.ramlakfilter()
+            ## creates a self.fanogram_ramlak_cosine
+            self.ramlak_cosine()
+            ## creates a self.fanogram_full_filtered
+            self.ramlak_cosine_parker()
+            ## creates a self.fanogram_ramlak_parker
+            self.ramlak_parker()
+            ## creates a self.fanogram_cosine_parker
+            self.cosine_parker()
+            self.select_filtered_image()
+        else:
+            pw = self.checkBox_ParkerWeigh.isChecked()
+            rl = self.checkBox_RamLakFilter.isChecked()
+            cf = self.checkBox_cosine.isChecked()
+            if pw and not rl and not cf:
+                self.parkerweight()
+                self.load_fan_in_view(self.fanogram_parker)
+            elif rl and not pw and not cf:
+                self.ramlakfilter()
+                self.load_fan_in_view(self.fanogram_ramlak)
+            elif cf and not pw and not rl:
+                self.cosinefilter()
+                self.load_fan_in_view(self.fanogram_cosine_filtered)
+            elif pw and rl and not cf:
+                self.ramlak_parker()
+                self.load_fan_in_view(self.fanogram_ramlak_parker)
+            elif pw and rl and cf:
+                self.ramlak_cosine_parker()
+                self.load_fan_in_view(self.fanogram_full_filtered)
+            elif cf and rl and not pw:
+                self.ramlak_cosine()
+                self.load_fan_in_view(self.fanogram_ramlak_cosine)
+            elif pw and cf and not rl:
+                self.cosine_parker()
+                self.load_fan_in_view(self.fanogram_cosine_parker)
+            elif not pw and not cf and not rl:
+                self.load_fan_in_view(self.fanogram)
 
-        print('start calcing weights')
-        ## creates a self.fanogram_parker
-        self.parkerweight()
-        ## creates a self.fanogram_cosine_filtered
-        self.cosinefilter()
-        ## creates  self.fanogram_ramlak
-        self.ramlakfilter()
-        ## creates a self.fanogram_ramlak_cosine
-        self.ramlak_cosine()
-        ## creates a self.fanogram_full_filtered
-        self.ramlak_cosine_parker()
-        ## creates a self.fanogram_ramlak_parker
-        self.ramlak_parker()
-        ## creates a self.fanogram_cosine_parker
-        self.cosine_parker()
-        print('finished calcing weights')
-        self.select_filtered_image()
         if(self.on_simulation):
             self.pB_Reconstruction.click()
 
@@ -386,14 +470,21 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         to_display = self.fanogramarray.copy()
         if to_display.min() < -100:
+            #to_display = self.scale_to_0_255(to_display)
             to_display += 800
             to_display /= 1600
-
+            to_display *= 255
+            im = Image.fromarray(to_display.astype(np.uint8))
+            contrast = ImageEnhance.Contrast(im)
+            contrasted_image = contrast.enhance(2)
+            to_display = np.array(contrasted_image.filter(ImageFilter.GaussianBlur(2)))
         else:
             to_display /= to_display.max()
-        to_display *= 255
+            to_display *= 255
+
+
         scaled_fan = to_display.astype(np.uint8)
-        self.load_sinogram_in_gv(scaled_fan)
+        self.load_sino_in_gv(scaled_fan)
 
 
 
@@ -454,31 +545,31 @@ class fanbeam_main(Ui_ReconstructionGUI):
             self.load_fan_in_view(self.fanogram_parker)
             print('parker_checked')
 
-        if rl and not pw and not cf:
+        elif rl and not pw and not cf:
             self.load_fan_in_view(self.fanogram_ramlak)
             print('ramlak checked')
 
-        if cf and not pw and not rl:
+        elif cf and not pw and not rl:
             self.load_fan_in_view(self.fanogram_cosine_filtered)
             print('cosine checked')
 
-        if pw and rl and not cf:
+        elif pw and rl and not cf:
             self.load_fan_in_view(self.fanogram_ramlak_parker)
             print('parker and ramlak')
 
-        if pw and rl and cf:
+        elif pw and rl and cf:
             self.load_fan_in_view(self.fanogram_full_filtered)
             print(' all filteres checked')
 
-        if cf and rl and not pw:
+        elif cf and rl and not pw:
             self.load_fan_in_view(self.fanogram_ramlak_cosine)
             print('cosien and ramlak')
 
-        if pw and cf and not rl:
+        elif pw and cf and not rl:
             self.load_fan_in_view(self.fanogram_cosine_parker)
             print('parker and cosine')
 
-        if not pw and not cf and not rl:
+        elif not pw and not cf and not rl:
             self.load_fan_in_view(self.fanogram)
 
             print('nothing checked')
@@ -533,7 +624,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         width = self.phantom_grayscale.shape[1]
         fan_beam_backprojector = self.pyconrad_instance.classes.stanford.rsl.tutorial.fan.FanBeamBackprojector2D(self.focalLength, self.deltaT, self.deltaBeta, width, height)
         self.backprojector_thread.init(self.use_cl, fan_beam_backprojector, self.current_fanogram)
-        print('going to project stuff')
         self.backprojector_thread.start()
 
 
@@ -546,7 +636,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.backFFT(back)
         if self.on_simulation:
             self.start_simulation()
-        print('this is b')
 
     ####Fourier transform of the phantom
     def backFFT(self, back):
@@ -558,7 +647,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.backFFTarray = gridimage.as_numpy()
         back_fft= self.fft_scaling(self.backFFTarray.copy())
         self.load_reco_fft_in_gv(back_fft.astype(np.uint8))
-        print('this shoudl be a and com before b')
+
 
 
     def load_phantom_in_gv(self, image):
@@ -571,6 +660,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Phantom.setScene(gs_ImgPhantom)
         self.gV_Phantom.setStyleSheet("background:black")
         self.phantom_loaded = True
+        self.scaled_phantom = image
         self.resizeEvent()
 
     def load_phantom_in_gv_from_string(self, fn):
@@ -608,9 +698,10 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Phantom_FFT.setScene(gs_ImgPhantom)
         self.gV_Phantom_FFT.setStyleSheet("background:black")
         self.phantom_fft_loaded = True
+        self.scaled_phantom_fft = image
         self.resizeEvent()
 
-    def load_sinogram_in_gv(self, image):
+    def load_sino_in_gv(self, image):
         img_sino = QtGui.QImage(image.data, image.shape[1], image.shape[0],
                                QtGui.QImage.Format_Grayscale8)
         pix_ImgSino = QtGui.QPixmap(img_sino)
@@ -620,6 +711,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Sinogram.setStyleSheet("background:black")
         self.gV_Sinogram.setScene(gs_ImgSino)
         self.sinogram_loaded = True
+        self.scaled_sinogram = image
         self.resizeEvent()
 
 
@@ -633,6 +725,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_SinogramFFT.setScene(gs_ImgPhantom)
         self.gV_SinogramFFT.setStyleSheet("background:black")
         self.sino_fft_loaded = True
+        self.scaled_sinogram_fft = image
         self.resizeEvent()
 
 
@@ -646,6 +739,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Backproj.setScene(gs_ImgPhantom)
         self.gV_Backproj.setStyleSheet("background:black")
         self.back_loaded = True
+        self.scaled_reco = image
         self.resizeEvent()
 
 
@@ -661,6 +755,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.gV_Backproj_FFT.setScene(gs_ImgPhantom)
         self.gV_Backproj_FFT.setStyleSheet("background:black")
         self.back_fft_loaded = True
+        self.scaled_reco_fft = image
         self.resizeEvent()
 
 
