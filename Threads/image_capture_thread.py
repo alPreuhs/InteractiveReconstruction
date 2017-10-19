@@ -4,8 +4,24 @@ import pygame
 import pygame.camera
 
 
+import time
+
 class image_capture_thread(QtCore.QThread):
     image_capture_finsihed  = QtCore.pyqtSignal(str)
+
+    def __init__(self):
+        QtCore.QThread.__init__(self)
+
+        pygame.camera.init()
+        self.cam = pygame.camera.Camera()
+
+
+    def scale_to_0_255(self,image):
+        image += np.min(image)
+        image /= np.max(image)
+        image -= np.min(image)
+        image *= 255.0/np.max(image)
+        return image
 
     def get_photo(self):
         return self.phantom_grayscale
@@ -17,9 +33,16 @@ class image_capture_thread(QtCore.QThread):
         return np.array(avgs)
 
     def run(self):
-        pygame.camera.init()
-        cam = pygame.camera.Camera()
-        cam.start()
-        img = cam.get_image()
-        self.phantom_grayscale = self.convert_pygame_to_grayscale(pygame.transform.rotate(img, 90))
+        time.sleep(0.5)
+        self.cam.start()
+        img = self.cam.get_image()
+
+        self.cam.stop()
+        print('this takes looooooooooong')
+        data = pygame.surfarray.array2d(pygame.transform.rotate(img, 90))
+        self.phantom_grayscale = self.scale_to_0_255(data.astype(np.float32))
+        print('faster ??')
+
+        #self.phantom_grayscale = self.convert_pygame_to_grayscale(pygame.transform.rotate(img, 90))
+        #print(' JOASJDOIAJSDJIO')
         self.image_capture_finsihed.emit('finished')
