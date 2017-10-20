@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1120</width>
-    <height>753</height>
+    <height>707</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -56,7 +56,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
+          <item row="5" column="1" colspan="2">
            <widget class="QScrollBar" name="hScrollBar_maxbeta">
             <property name="palette">
              <palette>
@@ -136,7 +136,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="2">
+          <item row="4" column="1" colspan="2">
            <widget class="QLabel" name="label_delta_2">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
@@ -148,6 +148,19 @@
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
+          </item>
+          <item row="3" column="1" colspan="2">
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -167,6 +180,19 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item>
            <widget class="QLabel" name="label_delta">
             <property name="layoutDirection">
@@ -239,6 +265,50 @@
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_8">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>T</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="sl_maxT">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
            </widget>
           </item>

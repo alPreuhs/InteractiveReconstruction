@@ -180,6 +180,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ## max beta slider
         self.hScrollBar_maxbeta.valueChanged.connect(self.on_max_beta_value_changed)
         self.hScrollBar_maxbeta.valueChanged.connect(self.set_max_beta_text)
+        ###
+        self.sl_maxT.valueChanged.connect(self.on_max_t_changed)
 
     def connect_checkboxes(self):
         #parker weights
@@ -201,6 +203,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def define_xray_projection(self):
         self.maxT = (float)(1300)
+        self.maxT_default = self.maxT
         self.focalLength = (float)(2400)
         self.gammaM = math.atan((self.maxT / 2.0 - 0.5) / self.focalLength)
         self.deltaT = (float)(1.0)
@@ -259,20 +262,20 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def on_photo_finished(self):
         print('finished thread')
         self.phantom_grayscale = self.image_capture_thread.get_photo()
+
+
         self.on_load_phantom()
         self.pB_videocapture.setDisabled(False)
         self.pB_PhantomSelect.setDisabled(False)
 
 
     def on_load_phantom(self):
-        #self.checkBox_cosine.setChecked(False)
-        #self.checkBox_ParkerWeigh.setChecked(False)
-        #self.checkBox_RamLakFilter.setChecked(False)
-
         self.on_image_loaded()
         gray_t = self.phantom_grayscale.astype(np.int8)
         self.pixmap_phantom = 0
         self.load_phantom_in_gv(gray_t)
+
+       # self.load_phantom_in_gv_from_string('image.png')
         self.generate_fft_of_phantom()
 
     def generate_fft_of_phantom(self):
@@ -578,6 +581,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.label_delta_2.setText("Maximale Angulation: {}/{}".format(self.hScrollBar_maxbeta.maximum(),int(math.degrees(self.maxBeta))))
 
 
+    def on_max_t_changed(self):
+        self.maxT = self.maxT_default * float(self.sl_maxT.value())/50.0
 
     ###Backprojection
     def on_reconstruction_clicked(self):
