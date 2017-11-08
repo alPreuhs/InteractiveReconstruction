@@ -53,7 +53,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def start_pyconrad(self):
         self.pyconrad_instance = PyConrad()
         self.pyconrad_instance.add_import('edu.stanford.rsl.conrad.data.numeric')
-        self.pyconrad_instance.setup()
+        self.pyconrad_instance.setup(dev_dirs=['D:/Prototypes/Conrad/CONRAD/'])
         self.pyconrad_instance.start_conrad()
 
 
@@ -190,6 +190,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
         self.checkBox_RamLakFilter.stateChanged.connect(self.ram_Lak_filter_check)
         #cosine weight
         self.checkBox_cosine.stateChanged.connect(self.cosine_filtere_check)
+        # derivative
+        self.checkBox_derivative.stateChanged.connect(self.derivative_check)
+        # hilbert
+        self.checkBox_hilbert.stateChanged.connect(self.hilbert_check)
+
 
     def connect_buttons(self):
         ##capture image
@@ -356,6 +361,8 @@ class fanbeam_main(Ui_ReconstructionGUI):
         ###in demo mode, we only compute the needed
         ###filtering
         if not self.on_simulation:
+            self.hilbert_filter()
+            self.derivative_filter()
             ## creates a self.fanogram_parker
             self.parkerweight()
             ## creates a self.fanogram_cosine_filtered
@@ -503,12 +510,33 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def cosine_filtere_check(self):
         self.select_filtered_image()
 
+
+    def derivative_check(self):
+        self.select_filtered_image()
+       # deriv = self.pyconrad_instance.classes.stanford.rsl.tutorial.filters.DerivativeKernel()
+
+        # self.fanogram_parker = self.pyconrad_instance.classes.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators.multipliedBy(
+
+        a = 10
+      #  self.load_fan_in_view(self.fanogram_parker)
+
+
+    def hilbert_check(self):
+        self.select_filtered_image()
+
+
     def select_filtered_image(self):
         pw = self.checkBox_ParkerWeigh.isChecked()
         # ramLakFilter
         rl = self.checkBox_RamLakFilter.isChecked()
         # cosine weight
         cf = self.checkBox_cosine.isChecked()
+
+        ##derivate
+        df = self.checkBox_derivative.isChecked()
+        hf = self.checkBox_hilbert.isChecked()
+
+
 
         if pw and not rl and not cf:
             self.load_fan_in_view(self.fanogram_parker)
@@ -540,10 +568,34 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         elif not pw and not cf and not rl:
             self.load_fan_in_view(self.fanogram)
-
             print('nothing checked')
-        print('')
 
+
+        if df:
+            self.load_fan_in_view(self.fanogram_derivative)
+            print('i showed thisdjopiajsd')
+            return
+
+        if hf:
+            self.load_fan_in_view(self.fanogram_hilbert)
+            print("i tried loding hilbert")
+
+
+    def hilbert_filter(self):
+
+        sizeimage = self.fanogram.getSize()[1]
+        self.fanogram_hilbert = self.fanogram.clone()
+        hilbert = self.pyconrad_instance.classes.stanford.rsl.tutorial.filters.HilbertKernel(1.0)
+        for theta in range(0, sizeimage):
+            hilbert.applyToGrid(self.fanogram_hilbert.getSubGrid(theta))
+
+
+    def derivative_filter(self):
+        sizeimage = self.fanogram.getSize()[1]
+        deriv = self.pyconrad_instance.classes.stanford.rsl.tutorial.filters.DerivativeKernel()
+        self.fanogram_derivative = self.fanogram.clone()
+        for theta in range(0, sizeimage):
+            deriv.applyToGrid(self.fanogram_derivative.getSubGrid(theta))
 
 
     def ramlakfilter(self):
