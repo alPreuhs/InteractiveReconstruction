@@ -14,6 +14,7 @@ class back_project_thread(QtCore.QThread):
         return self.back
 
     def run(self):
+        a = 10
         if self.use_cl:
             self.back = self.Backprojection.backprojectPixelDrivenCL(self.fanogram)
         else:
