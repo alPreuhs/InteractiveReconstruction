@@ -19,7 +19,7 @@ class forward_project_thread(QtCore.QThread):
     def run(self):
         jpype.attachThreadToJVM()
         if self.use_cl:
-            self.fanogram = self.ForwardProj.projectRayDrivenCL(self.Phantom)
+            self.fanogram = self.ForwardProj.projectRayDrivenCL(self.Phantom.grid)
         else:
             self.fanogram = self.ForwardProj.projectRayDriven(self.Phantom)
        # time.sleep(5)
