@@ -38,11 +38,8 @@ class image_capture_thread(QtCore.QThread):
         img = self.cam.get_image()
 
         self.cam.stop()
-        print('this takes looooooooooong')
         data = pygame.surfarray.array2d(pygame.transform.rotate(img, 90))
         self.phantom_grayscale = self.scale_to_0_255(data.astype(np.float32))
-        print('faster ??')
-
         #self.phantom_grayscale = self.convert_pygame_to_grayscale(pygame.transform.rotate(img, 90))
         #print(' JOASJDOIAJSDJIO')
         self.image_capture_finsihed.emit('finished')

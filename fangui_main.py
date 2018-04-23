@@ -155,7 +155,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
             Image.fromarray(self.scaled_reco).save(r'photos/Rekonstruktion.png')
 
     def on_save_back_fft2(self):
-        print('try do reco fft')
         if self.back_fft_loaded:
             Image.fromarray(self.scaled_reco_fft).save(r'photos/Rekonstruktion_FFT.png')
 
@@ -254,13 +253,11 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def on_live_image_clicked(self):
         self.pB_videocapture.setDisabled(True)
         self.pB_PhantomSelect.setDisabled(True)
-        print('start thread')
         self.load_phantom_in_gv_from_string(r'resource_photos/laecheln.png')
         self.image_capture_thread.start()
 
 
     def on_photo_finished(self):
-        print('finished thread')
         self.phantom_grayscale = self.image_capture_thread.get_photo()
 
 
@@ -334,7 +331,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
     ####forward projection
     def on_roentgen_clicked(self):
         self.pB_Xray.setDisabled(True)
-        print('i do roentgen')
         self.pB_Reconstruction.setDisabled(False)
         ####Forward Projection
         ForwardProj = pyconrad.edu().stanford.rsl.tutorial.fan.FanBeamProjector2D(self.focalLength, self.maxBeta, self.deltaBeta, self.maxT, self.deltaT)
@@ -512,37 +508,33 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
         if pw and not rl and not cf:
             self.load_fan_in_view(self.fanogram_parker)
-            print('parker_checked')
+
 
         elif rl and not pw and not cf:
             self.load_fan_in_view(self.fanogram_ramlak)
-            print('ramlak checked')
+
 
         elif cf and not pw and not rl:
             self.load_fan_in_view(self.fanogram_cosine_filtered)
-            print('cosine checked')
+
 
         elif pw and rl and not cf:
             self.load_fan_in_view(self.fanogram_ramlak_parker)
-            print('parker and ramlak')
+
 
         elif pw and rl and cf:
             self.load_fan_in_view(self.fanogram_full_filtered)
-            print(' all filteres checked')
+
 
         elif cf and rl and not pw:
             self.load_fan_in_view(self.fanogram_ramlak_cosine)
-            print('cosien and ramlak')
 
         elif pw and cf and not rl:
             self.load_fan_in_view(self.fanogram_cosine_parker)
-            print('parker and cosine')
 
         elif not pw and not cf and not rl:
             self.load_fan_in_view(self.fanogram)
 
-            print('nothing checked')
-        print('')
 
 
 
@@ -644,7 +636,6 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
 
     def load_phantom_fft_in_gv_from_string(self, fn, load_fft = True):
-        print('loading from string')
         img_fft = QtGui.QImage(fn)
         pix_ImgPhantomfft = QtGui.QPixmap(img_fft)
         self.gpi_phantom_fft = QtWidgets.QGraphicsPixmapItem(pix_ImgPhantomfft)
