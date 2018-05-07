@@ -20,6 +20,7 @@ class fanbeam_main(Ui_ReconstructionGUI):
     def __init__(self, MainWindow):
         self.MainWindow = MainWindow
         self.start_pyconrad()
+        pyconrad.start_gui()
 
         ##somehow tracback is disabled by default,
         ##the following reactivats it
@@ -113,23 +114,24 @@ class fanbeam_main(Ui_ReconstructionGUI):
 
     def on_open_phantom(self,point):
         if self.phantom_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_grayscale).show("Phantom");
+           # self.phantom_grid = pyconrad.PyGrid.from_numpy(self.phantom_grayscale)
+            pyconrad.PyGrid.from_numpy(self.phantom_grayscale).show("Phantom");
     def on_open_phantom_fft(self, point):
         if self.phantom_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.phantom_fft).show("FFT des Phantoms");
+            pyconrad.PyGrid.from_numpy(self.phantom_fft).show("FFT des Phantoms");
     def on_open_sinogram(self, point):
         if self.sinogram_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.fanogramarray).show("Fanogram");
+            pyconrad.PyGrid.from_numpy(self.fanogramarray).show("Fanogram");
 
     def on_open_sinogram_fft(self, point):
         if self.sino_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.fanFFTarray).show("FFT des Fanograms");
+            pyconrad.PyGrid.from_numpy(self.fanFFTarray).show("FFT des Fanograms");
     def on_open_back(self, point):
         if self.back_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.backarray).show("Rekonstruktion");
+            pyconrad.PyGrid.from_numpy(self.backarray).show("Rekonstruktion");
     def on_open_back_fft(self, point):
         if self.back_fft_loaded:
-            self.pyconrad_instance['Grid2D'].from_numpy(self.backFFTarray).show("FFT der Rekonstruktion");
+            pyconrad.PyGrid.from_numpy(self.backFFTarray).show("FFT der Rekonstruktion");
 
 
 

@@ -9,7 +9,10 @@ class image_capture_thread(QtCore.QThread):
 
     def __init__(self):
         QtCore.QThread.__init__(self)
-        self.vc = cv2.VideoCapture(1)
+
+
+        ###typically external cameras are listed last, thus this takes the last camera
+        self.vc = cv2.VideoCapture(0)
 
 
 
