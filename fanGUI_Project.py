@@ -285,7 +285,7 @@ class Ui_ReconstructionGUI(object):
         self.bt_start_simulation.setText(_translate("ReconstructionGUI", "Starte Simulation"))
         self.bt_stop_simulation.setText(_translate("ReconstructionGUI", "Stoppe Simulation"))
         self.label_delta_2.setText(_translate("ReconstructionGUI", "<html><head/><body><p>Maximale Angulation</p></body></html>"))
-        self.label_delta.setText(_translate("ReconstructionGUI", "<html><head/><body><p>Winkelabgstand zwischen Projektionen</p></body></html>"))
+        self.label_delta.setText(_translate("ReconstructionGUI", "<html><head/><body><p>Winkelabstand zwischen Projektionen</p></body></html>"))
         self.label.setText(_translate("ReconstructionGUI", "T"))
         self.groupBox_2.setTitle(_translate("ReconstructionGUI", "Filterungen"))
         self.checkBox_ParkerWeigh.setText(_translate("ReconstructionGUI", "Parker"))
